@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Universal Downloader Pro</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #161a22;
+      --panel-2: #1d222c;
+      --border: #262c3a;
+      --muted: #8a93a6;
+      --fg: #e6e9f1;
+      --accent: #4f8cff;
+      --accent-2: #2ec4b6;
+      --ok: #2ecc71;
+      --warn: #f1c40f;
+      --bad: #e74c3c;
+      --shadow: rgba(0,0,0,0.35);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: radial-gradient(circle at top left, #1a2030, #0b0d12 60%);
+      color: var(--fg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+      min-height: 100vh;
+    }
+    header.topbar {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px;
+      background: rgba(22,26,34,0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 800; letter-spacing: 0.2px;
+    }
+    .brand .logo {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid; place-items: center; color: white; font-weight: 900;
+    }
+    .health {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 10px; border-radius: 999px;
+      background: var(--panel-2); border: 1px solid var(--border);
+      color: var(--muted); font-size: 12px;
+    }
+    .health .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+    .health.ok .dot { background: var(--ok); box-shadow: 0 0 0 3px rgba(46,204,113,0.25); }
+
+    main {
+      max-width: 980px; margin: 0 auto;
+      padding: 22px 18px 120px;
+    }
+
+    .hero {
+      margin: 8px 0 18px;
+    }
+    .hero h1 {
+      font-size: 34px; line-height: 1.1; margin: 0;
+      background: linear-gradient(to right, #fff, #b8c2d6);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero p { color: var(--muted); margin: 8px 0 0; }
+
+    .input-card {
+      background: linear-gradient(180deg, rgba(29,34,44,0.9), rgba(22,26,34,0.9));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 30px var(--shadow);
+    }
+    .input-row {
+      display: flex; gap: 10px; align-items: stretch;
+    }
+    .input-row input[type="url"] {
+      flex: 1 1 auto;
+      padding: 14px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #0f1218; color: var(--fg);
+      font-size: 15px;
+      outline: none;
+    }
+    .input-row input[type="url"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,140,255,0.15); }
+    .btn {
+      border: 0; border-radius: 12px; padding: 14px 18px;
+      font-weight: 700; color: white; cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), #6aa6ff);
+      box-shadow: 0 8px 20px rgba(79,140,255,0.25);
+      transition: transform .05s ease, filter .2s ease;
+    }
+    .btn:hover { filter: brightness(1.05); }
+    .btn:active { transform: translateY(1px); }
+    .btn.secondary {
+      background: linear-gradient(135deg, var(--accent-2), #5fe0d1);
+      box-shadow: 0 8px 20px rgba(46,196,182,0.25);
+    }
+    .btn.ghost {
+      background: var(--panel-2); color: var(--fg);
+      box-shadow: none; border: 1px solid var(--border);
+    }
+
+    .meta {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      margin-top: 12px; min-height: 28px;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 10px; border-radius: 999px;
+      background: var(--panel-2); border: 1px solid var(--border);
+      color: var(--muted); font-size: 12px;
+    }
+    .chip .mode {
+      color: var(--fg); font-weight: 700;
+    }
+
+    .options {
+      display: none; gap: 8px; flex-wrap: wrap; margin-top: 12px;
+    }
+    .options.show { display: flex; }
+    .toggle {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 10px;
+      background: var(--panel-2); border: 1px solid var(--border);
+      color: var(--fg); font-size: 13px; cursor: pointer; user-select: none;
+    }
+    .toggle input { accent-color: var(--accent); }
+
+    .progress-card {
+      margin-top: 14px; padding: 14px; border-radius: 14px;
+      background: var(--panel); border: 1px solid var(--border);
+      display: none;
+    }
+    .progress-card.show { display: block; }
+    .progress-header { display: flex; justify-content: space-between; gap: 10px; }
+    .progress-title { font-weight: 700; }
+    .progress-status { color: var(--muted); font-size: 12px; }
+    .bar-bg {
+      margin-top: 10px; height: 8px; border-radius: 999px;
+      background: #0f1218; border: 1px solid var(--border); overflow: hidden;
+    }
+    .bar-fg {
+      height: 100%; width: 0%; border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width .25s ease;
+    }
+    .eta { margin-top: 8px; color: var(--muted); font-size: 12px; }
+
+    .done-toast {
+      position: fixed; right: 18px; bottom: 18px; z-index: 100;
+      width: 360px; max-width: calc(100% - 36px);
+      padding: 14px; border-radius: 14px;
+      background: rgba(22,26,34,0.95); border: 1px solid var(--border);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+      transform: translateY(120%); opacity: 0; transition: all .25s ease;
+    }
+    .done-toast.show { transform: translateY(0); opacity: 1; }
+    .done-toast .title { font-weight: 800; margin-bottom: 6px; }
+    .done-toast .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+    .settings-panel {
+      position: fixed; inset: 0; z-index: 90; display: none;
+    }
+    .settings-panel.open { display: block; }
+    .settings-backdrop {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.45);
+    }
+    .settings-drawer {
+      position: absolute; right: 0; top: 0; bottom: 0; width: 420px; max-width: 100%;
+      background: #13161d; border-left: 1px solid var(--border);
+      padding: 18px; overflow: auto;
+    }
+    .settings-drawer h2 { margin: 0 0 12px; font-size: 18px; }
+    .settings-drawer .group { margin-bottom: 16px; }
+    .settings-drawer label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .settings-drawer input, .settings-drawer select {
+      width: 100%; padding: 10px; border-radius: 10px;
+      border: 1px solid var(--border); background: #0f1218; color: var(--fg);
+    }
+
+    .history {
+      margin-top: 22px;
+      background: linear-gradient(180deg, rgba(29,34,44,0.9), rgba(22,26,34,0.9));
+      border: 1px solid var(--border); border-radius: 16px;
+      padding: 14px;
+    }
+    .history-header {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    }
+    .history-header h3 { margin: 0; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+    .filters { display: flex; gap: 8px; }
+    .filters input, .filters select {
+      padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border);
+      background: #0f1218; color: var(--fg); font-size: 12px;
+    }
+    .history-list {
+      margin-top: 10px; max-height: 340px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .history-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 10px; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .history-item:hover { border-color: #3a4257; }
+    .history-item .main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .history-item .url { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-item .sub { color: var(--muted); font-size: 12px; }
+    .badge {
+      padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800;
+      background: #2a313f; color: #c8d0e0; white-space: nowrap;
+    }
+    .badge.succeeded { background: rgba(46,204,113,0.12); color: var(--ok); }
+    .badge.failed { background: rgba(231,76,60,0.12); color: var(--bad); }
+    .badge.partial { background: rgba(241,196,15,0.12); color: var(--warn); }
+    .badge.running { background: rgba(79,140,255,0.12); color: var(--accent); }
+
+    .modal {
+      position: fixed; inset: 0; z-index: 100; display: none;
+    }
+    .modal.open { display: block; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
+    .modal-drawer {
+      position: absolute; right: 0; top: 0; bottom: 0; width: 520px; max-width: 100%;
+      background: #13161d; border-left: 1px solid var(--border);
+      padding: 18px; overflow: auto;
+    }
+    .modal-drawer h2 { margin: 0 0 10px; }
+    .modal-drawer .meta-grid { display: grid; grid-template-columns: 140px 1fr; gap: 8px 12px; font-size: 13px; }
+    .modal-drawer .meta-grid dt { color: var(--muted); }
+    .modal-drawer .media-grid {
+      display: grid; grid-template-columns: repeat(auto-fill,minmax(90px,1fr)); gap: 8px; margin-top: 10px;
+    }
+    .media-grid .tile {
+      aspect-ratio: 16/10; border-radius: 10px; overflow: hidden;
+      background: #0f1218; border: 1px solid var(--border);
+      display: grid; place-items: center; color: var(--muted); font-size: 11px;
+    }
+    .media-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .media-grid video, .media-grid audio { width: 100%; }
+    .media-grid iframe { width: 100%; height: 100%; border: 0; background: #0b0d12; }
+
+    .empty { color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">U</div>
+      <div>
+        <div>Universal Downloader Pro</div>
+        <div style="font-size:11px;color:var(--muted)">One link. Every capability. Done.</div>
+      </div>
+    </div>
+    <div class="health" id="health">
+      <span class="dot"></span>
+      <span id="healthText">Checking...</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button id="settingsBtn" class="btn ghost">Settings</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Download. Archive. Stream.</h1>
+      <p>Paste any link. Universal Downloader Pro figures out what it is and handles it.</p>
+    </section>
+
+    <section class="input-card">
+      <div class="input-row">
+        <input id="url" type="url" placeholder="Paste any link: YouTube, page, image, PDF, Twitch, Instagram…" />
+        <button id="goBtn" class="btn">Go</button>
+      </div>
+      <div class="meta" id="meta">
+        <div class="chip">Mode: <span id="mode" class="mode">—</span></div>
+        <div id="modeHint" class="empty"></div>
+      </div>
+      <div class="options" id="options">
+        <label class="toggle"><input type="checkbox" id="audioOnly" /> Audio only</label>
+        <label class="toggle"><input type="checkbox" id="playlist" /> Include playlist</label>
+      </div>
+      <label class="toggle" style="margin-top:8px"><input type="checkbox" id="cookiesFromBrowser" /> Use browser cookies</label>
+      <div class="progress-card" id="progress">
+        <div class="progress-header">
+          <div>
+            <div class="progress-title" id="progressTitle">Working</div>
+            <div class="progress-status" id="progressStatus">Starting…</div>
+          </div>
+        </div>
+        <div class="bar-bg"><div class="bar-fg" id="progressBar"></div></div>
+        <div class="eta" id="progressEta"></div>
+      </div>
+    </section>
+
+    <section class="history">
+      <div class="history-header">
+        <h3>History</h3>
+        <div class="filters">
+          <input id="q" placeholder="Search" />
+          <select id="status">
+            <option value="">All status</option>
+            <option value="succeeded">Succeeded</option>
+            <option value="running">Running</option>
+            <option value="failed">Failed</option>
+            <option value="partial">Partial</option>
+          </select>
+          <select id="modeFilter">
+            <option value="">All modes</option>
+            <option value="direct">Direct</option>
+            <option value="archive">Archive</option>
+            <option value="stream">Stream</option>
+            <option value="web">Web</option>
+          </select>
+        </div>
+      </div>
+      <div class="history-list" id="history">
+        <div class="empty">No history yet.</div>
+      </div>
+    </section>
+  </main>
+
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-backdrop" id="settingsBackdrop"></div>
+    <div class="settings-drawer">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Settings</h2>
+        <button id="settingsClose" class="btn ghost">Close</button>
+      </div>
+      <div class="group">
+        <label>API Token</label>
+        <input id="token" type="text" placeholder="Token auto-synced" />
+      </div>
+      <div class="group">
+        <label>Proxy URL</label>
+        <input id="proxyUrl" type="url" placeholder="http://127.0.0.1:8080" />
+      </div>
+      <div class="group" style="display:flex;gap:8px">
+        <button id="saveProxy" class="btn secondary" style="flex:1">Save proxy</button>
+        <button id="dnsLeak" class="btn ghost" style="flex:1">DNS leak check</button>
+      </div>
+      <div class="group">
+        <label>History</label>
+        <button id="clearHistory" class="btn ghost" style="width:100%">Clear history</button>
+      </div>
+      <div class="group">
+        <label>Playbook</label>
+        <button id="regenPlaybook" class="btn ghost" style="width:100%">Regenerate playbook</button>
+      </div>
+      <div class="group">
+        <label>Training export</label>
+        <button id="exportTraining" class="btn ghost" style="width:100%">Export JSON</button>
+      </div>
+      <div class="group">
+        <label>Firewall</label>
+        <button id="firewallCommands" class="btn ghost" style="width:100%">Show lockdown commands</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-drawer">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 id="modalTitle">Job details</h2>
+        <button id="modalClose" class="btn ghost">Close</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="done-toast" id="toast">
+    <div class="title">Done</div>
+    <div id="toastMsg" class="empty">Job completed.</div>
+    <div class="actions" id="toastActions"></div>
+  </div>
+
+  <script>
+    const API_BASE = '';
+    const qs = (s, r = document) => r.querySelector(s);
+    const qsa = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+    function $(id) { return document.getElementById(id); }
+
+    async function api(path, opts = {}) {
+      const token = localStorage.getItem('udp_token') || '';
+      const headers = new Headers(opts.headers || {});
+      if (token) headers.set('X-API-Token', token);
+      if (!headers.has('Content-Type') && opts.body) headers.set('Content-Type', 'application/json');
+      const res = await fetch(API_BASE + path, { ...opts, headers });
+      if (res.status === 401) toast('Auth error', 'Check token in Settings.', [{label:'Open settings', action: openSettings}]);
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      return res;
+    }
+
+    function toast(title, msg = '', actions = []) {
+      const el = $('toast');
+      $('toastMsg').textContent = msg || '';
+      $('toast').querySelector('.title').textContent = title;
+      const box = $('toastActions');
+      box.innerHTML = '';
+      actions.forEach(a => {
+        const b = document.createElement('button');
+        b.className = 'btn secondary';
+        b.textContent = a.label;
+        b.onclick = () => { a.action(); hideToast(); };
+        box.appendChild(b);
+      });
+      el.classList.add('show');
+      setTimeout(hideToast, 12000);
+    }
+    function hideToast() { $('toast').classList.remove('show'); }
+
+    async function loadHealth() {
+      try {
+        const res = await api('/health');
+        const data = await res.json();
+        const el = $('health');
+        const txt = $('healthText');
+        if (data.status === 'ok') { el.classList.add('ok'); txt.textContent = 'Ready'; }
+        else { el.classList.remove('ok'); txt.textContent = 'Degraded'; }
+      } catch (e) {
+        $('health').classList.remove('ok'); $('healthText').textContent = 'Offline';
+      }
+    }
+
+    async function syncToken() {
+      try {
+        const res = await api('/api/token');
+        const data = await res.json();
+        if (data && data.token) {
+          localStorage.setItem('udp_token', data.token.trim());
+          $('token').value = data.token.trim();
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    async function analyze(url) {
+      const res = await api(`/api/analyze?url=${encodeURIComponent(url)}`);
+      return await res.json();
+    }
+
+    async function submit(url, mode, opts = {}) {
+      const body = { url, mode, ...opts };
+      const res = await api('/api/download', { method: 'POST', body: JSON.stringify(body) });
+      return await res.json();
+    }
+
+    function setProgress({title, status, pct, eta}) {
+      const card = $('progress');
+      card.classList.add('show');
+      $('progressTitle').textContent = title || 'Working';
+      $('progressStatus').textContent = status || '';
+      $('progressBar').style.width = Math.max(0, Math.min(100, pct || 0)) + '%';
+      $('progressEta').textContent = eta ? `ETA ${eta}` : '';
+    }
+    function hideProgress() { $('progress').classList.remove('show'); }
+
+    async function watchJob(taskId, opts = {}) {
+      setProgress({title: opts.title || 'Working', status: 'Starting…', pct: 0});
+      const source = new EventSource(`${API_BASE}/api/jobs/${taskId}/stream`);
+
+      const done = (data) => {
+        source.close();
+        hideProgress();
+        renderHistory();
+        if (data.status === 'succeeded') {
+          toast('Done', opts.doneMessage || 'Job completed.', [
+            {label:'View', action: () => openDetail(taskId)},
+            {label:'Open folder', action: () => openFolder(taskId)},
+            ...(opts.doneActions || [])
+          ]);
+        } else {
+          const errMsg = (data.error_message || data.status || '').toLowerCase();
+            const actions = [{label:'Details', action: () => openDetail(taskId)}];
+            if (errMsg.includes('sign in to confirm you') && errMsg.includes('bot')) {
+              actions.unshift({label:'Enable browser cookies', action: () => { cookiesFromBrowser.checked = true; toast('Enabled', 'Browser cookies enabled for next submit.'); }});
+            }
+            toast('Job ended', data.error_message || data.status, actions);
+        }
+      };
+
+      source.addEventListener('status', (ev) => {
+        try {
+          const data = JSON.parse(ev.data);
+          if (data.status === 'succeeded' || data.status === 'failed' || data.status === 'partial') {
+            done(data);
+            return;
+          }
+          if (data.progress !== undefined) {
+            setProgress({
+              title: opts.title || 'Working',
+              status: data.status ? String(data.status) : '',
+              pct: Number(data.progress) || 0,
+              eta: data.eta || ''
+            });
+          }
+          if (data.error) {
+            done({status: 'failed', error_message: String(data.error)});
+          }
+        } catch (e) { /* noop */ }
+      });
+
+      source.addEventListener('progress', (ev) => {
+        try {
+          const data = JSON.parse(ev.data);
+          setProgress({
+            title: opts.title || 'Working',
+            status: data.status ? String(data.status) : '',
+            pct: Number(data.progress) || 0,
+            eta: data.eta || ''
+          });
+        } catch (e) { /* noop */ }
+      });
+
+      source.addEventListener('done', () => {
+        source.close();
+        hideProgress();
+        renderHistory();
+        toast('Done', opts.doneMessage || 'Job completed.', [
+          {label:'View', action: () => openDetail(taskId)},
+          {label:'Open folder', action: () => openFolder(taskId)},
+          ...(opts.doneActions || [])
+        ]);
+      });
+
+      source.onerror = () => { source.close(); };
+    }
+
+    async function loadHistory() {
+      const q = $('q').value;
+      const status = $('status').value;
+      const mode = $('modeFilter').value;
+      const url = `${API_BASE}/api/history?q=${encodeURIComponent(q)}&status=${encodeURIComponent(status)}&mode=${encodeURIComponent(mode)}`;
+      const res = await api(url);
+      const jobs = await res.json();
+      const box = $('history');
+      if (!jobs.length) { box.innerHTML = '<div class="empty">No history yet.</div>'; return; }
+      box.innerHTML = jobs.map(j => `
+        <div class="history-item" data-id="${j.task_id}">
+          <div class="main">
+            <div class="url" title="${escapeHtml(j.url)}">${escapeHtml(j.url)}</div>
+            <div class="sub">${escapeHtml(j.mode || '')} • ${new Date(j.created_at).toLocaleString()}</div>
+          </div>
+          <span class="badge ${j.status}">${j.status}</span>
+        </div>
+      `).join('');
+      qsa('.history-item', box).forEach(el => el.onclick = () => openDetail(el.dataset.id));
+    }
+
+    async function openDetail(taskId) {
+      try {
+        const res = await api(`/api/jobs/${taskId}/detail`);
+        const data = await res.json();
+        const job = data.job || {};
+        const assets = data.assets || [];
+        const report = data.report || '';
+        const failed = data.failed_assets || [];
+        const stream = job.stream || null;
+        const file = job.file || null;
+
+        let body = `<dl class="meta-grid">
+          <dt>URL</dt><dd>${escapeHtml(job.url)}</dd>
+          <dt>Mode</dt><dd>${escapeHtml(job.mode)}</dd>
+          <dt>Status</dt><dd>${escapeHtml(job.status)}</dd>
+          <dt>Created</dt><dd>${escapeHtml(job.created_at || '')}</dd>
+          <dt>File</dt><dd>${file && file.path ? escapeHtml(file.path) : '—'}</dd>
+          <dt>Size</dt><dd>${file && file.size ? bytes(file.size) : '—'}</dd>
+          ${stream ? `<dt>Stream title</dt><dd>${escapeHtml(stream.title || job.stream_title || '')}</dd>
+          <dt>Duration</dt><dd>${escapeHtml(stream.duration || job.stream_duration || '')}</dd>
+          <dt>Thumbnail</dt><dd><img src="${escapeHtml(stream.thumbnail || job.stream_thumbnail || '')}" style="max-width:180px;border-radius:8px;border:1px solid var(--border)"/></dd>` : ''}
+        </dl>`;
+
+        const mediaItems = [];
+        const mainFiles = [];
+        const assetItems = [];
+
+        if (stream && (stream.thumbnail || job.stream_thumbnail)) {
+          mediaItems.push({ kind: 'image', url: stream.thumbnail || job.stream_thumbnail, filename: 'thumbnail' + (stream.thumbnail ? stream.thumbnail.split('.').pop() : '') });
+        }
+        if (file && file.path) {
+          const raw = file.path.replace(/\\/g, '/');
+          const rel = raw.includes('/UniversalDownloaderPro/downloads/')
+            ? raw.split('/UniversalDownloaderPro/downloads/')[1]
+            : raw.split('/').pop();
+          const fileUrl = `/files/${encodeURIComponent(rel)}`;
+          mainFiles.push({ kind: 'file', url: fileUrl, filename: rel.split('/').pop() || rel, size: file.size });
+        }
+        if (assets.length) {
+          assets.forEach(a => {
+            const kind = (a.kind || '').toLowerCase();
+            if (kind.startsWith('image') || kind.startsWith('video') || kind.startsWith('audio')) {
+              mediaItems.push({ kind, url: a.url, filename: a.name, size: a.size });
+            } else {
+              assetItems.push({ kind, url: a.url, filename: a.name, size: a.size, task_id: taskId });
+            }
+          });
+        }
+
+        function section(title, items, tileFn) {
+          if (!items.length) return '';
+          return `<h3 style="margin-top:14px">${escapeHtml(title)}</h3><div class="media-grid">` + items.map(tileFn).join('') + '</div>';
+        }
+
+        body += section('Media', mediaItems, item => mediaTile({ ...item, task_id: taskId }));
+        body += section('Main File', mainFiles, item => fileTile(item));
+        body += section('Assets', assetItems, item => codeTile(item));
+
+        if (stream) {
+          body += `<div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn secondary" onclick="window.open('${escapeHtml(`/api/stream/${taskId}/play`)}','_blank')">Play</button>
+            <a class="btn ghost" href="${escapeHtml(`/api/stream/${taskId}/download`)}" download>Download</a>
+          </div>`;
+        }
+
+        if (data.archive_url) {
+          body += `<div style="margin-top:12px"><a class="btn secondary" href="${escapeHtml(data.archive_url)}" target="_blank">Open archive</a></div>`;
+        }
+
+        if (file && file.path && file.exists && !stream) {
+          const fileUrl = `/files/${encodeURIComponent(file.path.split('/').pop().split('\\').pop())}`;
+          body += `<div style="margin-top:12px;display:flex;gap:8px">
+            <a class="btn secondary" href="${escapeHtml(fileUrl)}" target="_blank">Open file</a>
+            <button class="btn ghost" onclick="window.open('${escapeHtml(fileUrl)}','_blank')">Download</button>
+          </div>`;
+        }
+
+        if (failed.length) {
+          const failedList = failed.map(f => {
+            const url = typeof f === 'string' ? f : (f.url || '');
+            return url ? `<li><a href="${escapeHtml(url)}" target="_blank">${escapeHtml(url)}</a></li>` : '';
+          }).filter(Boolean).join('');
+          body += `<h3 style="margin-top:16px">Failed assets</h3>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="btn secondary" id="retry-failed-btn">Retry failed</button>
+              <span class="muted" style="font-size:11px">${failed.length} failed</span>
+            </div>
+            <ul style="margin-top:8px;padding-left:18px;color:var(--muted);font-size:12px">${failedList}</ul>`;
+        }
+        if (report) {
+          body += `<h3 style="margin-top:16px">Report</h3><pre style="white-space:pre-wrap;color:#cfd6e6;background:#0f1218;padding:10px;border-radius:10px;border:1px solid var(--border);font-size:12px">${escapeHtml(report)}</pre>`;
+        }
+
+        $('modalBody').innerHTML = body;
+        $('modal').classList.add('open');
+
+        const retryBtn = $('retry-failed-btn');
+        if (retryBtn) {
+          retryBtn.onclick = async () => {
+            retryBtn.disabled = true;
+            retryBtn.textContent = 'Retrying…';
+            try {
+              const res = await api(`/api/archives/${taskId}/salvage`, {method: 'POST'});
+              const data = await res.json();
+              toast('Retrying failed assets', data.task_id ? `Started job ${data.task_id}` : 'Started');
+              watchJob(taskId, {
+                title: 'Retrying assets',
+                statusTitle: 'Retrying assets',
+                doneMessage: 'Retry complete.',
+                doneActions: [{label: 'Refresh', action: () => openDetail(taskId)}]
+              });
+            } catch (e) {
+              retryBtn.disabled = false;
+              retryBtn.textContent = 'Retry failed';
+              toast('Retry failed', e.message);
+            }
+          };
+        }
+      } catch (e) {
+        toast('Open detail failed', e.message);
+      }
+    }
+
+    function mediaTile(a) {
+      const kind = (a.kind || '').toLowerCase();
+      const url = a.url || `/api/archives/${a.task_id}/assets/${encodeURIComponent(a.filename)}`;
+      if (kind.startsWith('image')) return `<div class="tile"><img src="${url}" loading="lazy"/></div>`;
+      if (kind.startsWith('video')) return `<div class="tile"><video src="${url}" controls></video></div>`;
+      if (kind.startsWith('audio')) return `<div class="tile"><audio src="${url}" controls></audio></div>`;
+      if (kind.startsWith('text/html') || a.filename.endsWith('.html')) return `<div class="tile"><iframe src="${url}"></iframe></div>`;
+      if (/\.(css|js|json|xml|txt)$/i.test(a.filename)) return `<div class="tile"><iframe src="${url}"></iframe></div>`;
+      return `<div class="tile"><a href="${url}" target="_blank" style="color:var(--fg);text-decoration:none">${escapeHtml(a.filename)}</a></div>`;
+    }
+
+    function fileTile(a) {
+      const url = a.url;
+      const name = escapeHtml(a.filename);
+      const size = a.size ? bytes(a.size) : '';
+      return `<div class="tile" style="aspect-ratio:auto;height:auto;padding:10px">
+        <div style="font-size:12px;color:var(--fg);word-break:break-all">${name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">${size}</div>
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+          <a class="btn secondary" href="${url}" target="_blank" style="font-size:11px;padding:4px 8px">Open</a>
+          <a class="btn ghost" href="${url}" download style="font-size:11px;padding:4px 8px">Download</a>
+        </div>
+      </div>`;
+    }
+
+    function codeTile(a) {
+      const url = a.url;
+      const name = escapeHtml(a.filename);
+      const size = a.size ? bytes(a.size) : '';
+      const ext = (a.filename || '').split('.').pop().toLowerCase();
+      const css = (a.kind === 'code' && ext === 'css') ? a.css : null;
+      const hasInsights = css && (
+        css.framework ||
+        (css.colors && css.colors.length) ||
+        (css.fonts && css.fonts.length) ||
+        (css.media_queries && css.media_queries.length)
+      );
+      const colorSwatches = hasInsights && css.colors && css.colors.length
+        ? css.colors.slice(0, 6).map(c => `<span class="swatch" style="background:${escapeHtml(c)}" title="${escapeHtml(c)}"></span>`).join('')
+        : '';
+      const fontChips = hasInsights && css.fonts && css.fonts.length
+        ? css.fonts.slice(0, 3).map(f => `<span class="chip">${escapeHtml(f.trim())}</span>`).join('')
+        : '';
+      const mediaLine = hasInsights && css.media_queries && css.media_queries.length
+        ? `<div style="font-size:11px;color:var(--muted);margin-top:6px">Media: ${escapeHtml(css.media_queries.join(' | '))}</div>`
+        : '';
+      const frameworkLine = hasInsights && css.framework
+        ? `<div style="font-size:11px;color:var(--accent);margin-top:4px">${escapeHtml(css.framework)}</div>`
+        : '';
+      let previewBtn = '';
+      if (ext === 'css' && url) {
+        const previewUrl = `/api/archives/${a.task_id}/css-preview?filename=${encodeURIComponent(name)}`;
+        previewBtn = `<a class="btn ghost" href="${previewUrl}" target="_blank" style="font-size:11px;padding:4px 8px;display:inline-block">Preview</a>`;
+      }
+      return `<div class="tile" style="aspect-ratio:auto;height:auto;padding:10px">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+          <div>
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">${escapeHtml(ext)}</div>
+            <div style="font-size:12px;color:var(--fg);word-break:break-all;margin-top:4px">${name}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">${size}</div>
+            ${frameworkLine}
+            ${mediaLine}
+            ${fontChips ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${fontChips}</div>` : ''}
+            ${colorSwatches ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${colorSwatches}</div>` : ''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;min-width:70px">
+            ${previewBtn ? previewBtn + '\n' : ''}
+            <a class="btn ghost" href="${url}" target="_blank" style="font-size:11px;padding:4px 8px;display:inline-block">View</a>
+            <a class="btn ghost" href="${url}" download style="font-size:11px;padding:4px 8px;display:inline-block">Download</a>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    async function openFolder(taskId) {
+      await api(`/api/files/open-folder`, {method:'POST', body: JSON.stringify({task_id: taskId})});
+      toast('Opened', 'Opened file location.');
+    }
+
+    async function go() {
+      const url = qs('#url').value.trim();
+      if (!url) return;
+      try {
+        setProgress({title:'Analyzing', status:'Detecting link type…', pct: 5});
+        const info = await analyze(url);
+        let mode = info.mode || info.category || 'unknown';
+        if (mode === 'unknown') mode = 'archive';
+        $('mode').textContent = mode;
+        const isStream = mode === 'stream';
+        const isArchive = mode === 'archive';
+        $('options').classList.toggle('show', isStream);
+        const audioOnly = $('audioOnly').checked;
+        const playlist = $('playlist').checked;
+        const cookiesFromBrowser = $('cookiesFromBrowser').checked;
+        const doneActions = [];
+        if (isStream) {
+          doneActions.push(
+            {label:'Play', action: async () => openDetail((await submit(url, mode, {audio_only: audioOnly, playlist, cookies_from_browser: cookiesFromBrowser})).task_id)},
+            {label:'Download', action: async () => openDetail((await submit(url, mode, {audio_only: audioOnly, playlist, cookies_from_browser: cookiesFromBrowser})).task_id)}
+          );
+        }
+        setProgress({title:'Submitting', status:'Creating job…', pct: 10});
+        const job = await submit(url, mode, {audio_only: audioOnly, playlist, cookies_from_browser: cookiesFromBrowser});
+        const label = isStream ? (audioOnly ? 'Downloading audio' : 'Downloading video') : (isArchive ? 'Archiving page' : 'Downloading');
+        await watchJob(job.task_id, {title: label, doneMessage: `${label} complete.`, doneActions});
+      } catch (e) {
+        hideProgress();
+        console.error('Job flow error', e);
+        toast('Job error', `${e.name}: ${e.message}`);
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+    function bytes(n) {
+      if (n == null) return '—';
+      n = Number(n); if (!n) return '0 B';
+      const u = ['B','KB','MB','GB','TB']; const i = Math.min(4, Math.floor(Math.log(n)/Math.log(1024)));
+      return (n/1024**i).toFixed(i?1:0) + ' ' + u[i];
+    }
+
+    function openSettings() { $('settingsPanel').classList.add('open'); syncToken(); }
+    function closeSettings() { $('settingsPanel').classList.remove('open'); }
+    function openModal() { $('modal').classList.add('open'); }
+    function closeModal() { $('modal').classList.remove('open'); }
+
+    $('goBtn').onclick = go;
+    qs('#url').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+
+    $('settingsBtn').onclick = openSettings;
+    $('settingsClose').onclick = closeSettings;
+    $('settingsBackdrop').onclick = closeSettings;
+    $('modalClose').onclick = closeModal;
+    $('modalBackdrop').onclick = closeModal;
+
+    $('saveProxy').onclick = async () => {
+      const url = $('proxyUrl').value.trim();
+      await api('/api/tunnel/proxy', {method:'PUT', body: JSON.stringify({proxy_url: url})});
+      toast('Proxy saved', url || 'Cleared');
+    };
+    $('dnsLeak').onclick = async () => {
+      const res = await api('/api/tunnel/dns-leak'); const data = await res.json(); toast('DNS leak', JSON.stringify(data));
+    };
+    $('clearHistory').onclick = async () => { await api('/api/history/clear', {method:'POST'}); renderHistory(); };
+    $('regenPlaybook').onclick = async () => { await api('/api/playbook/regenerate', {method:'POST'}); toast('Playbook', 'Regenerated'); };
+    $('exportTraining').onclick = async () => { window.open('/api/training/export', '_blank'); };
+    $('firewallCommands').onclick = async () => { window.open('/api/firewall/commands?port=51820', '_blank'); };
+
+    qsa('#q, #status, #modeFilter').forEach(el => el.addEventListener('input', renderHistory));
+
+    async function renderHistory() { await loadHistory(); }
+
+    (async () => { await loadHealth(); await syncToken(); await renderHistory(); })();
+  </script>
+</body>
+</html>
