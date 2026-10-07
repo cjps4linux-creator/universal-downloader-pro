@@ -15,7 +15,7 @@ ensure_dirs()
 
 
 def _venv_yt_dlp() -> str:
-    return str(Path(__file__).resolve().parent.parent / ".venv" / "Scripts" / "yt-dlp.exe")
+    return str(Path(__file__).resolve().parent.parent.parent.parent / ".venv" / "Scripts" / "yt-dlp.exe")
 
 
 def stream_with_ytdlp(url: str, dest: Path, job_id: str, *, cookies: Optional[str] = None, cookies_from_browser: Optional[str] = None, audio_only: bool = False, playlist: bool = False) -> tuple[Path, Optional[str]]:
