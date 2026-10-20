@@ -1,0 +1,12 @@
+{
+  "name": "universal-downloader-pro-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frontend DOM tests for the Universal Downloader Pro single-page UI.",
+  "scripts": {
+    "test": "node tests/frontend/kb-panel.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "25.0.1"
+  }
+}

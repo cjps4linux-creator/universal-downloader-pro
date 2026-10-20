@@ -43,3 +43,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: test -f README.md && echo "README present"
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install jsdom
+        run: npm install --no-save --no-fund --no-audit jsdom@25
+      - name: Run frontend DOM tests
+        run: node tests/frontend/kb-panel.test.js

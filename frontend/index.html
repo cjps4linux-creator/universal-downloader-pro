@@ -164,6 +164,55 @@
     .done-toast .title { font-weight: 800; margin-bottom: 6px; }
     .done-toast .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 
+
+    /* ---- Knowledge base panel ---- */
+    .kb-panel {
+      position: fixed; inset: 0; z-index: 95; display: none;
+    }
+    .kb-panel.open { display: block; }
+    .kb-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
+    .kb-drawer {
+      position: absolute; right: 0; top: 0; bottom: 0; width: 720px; max-width: 100%;
+      background: #13161d; border-left: 1px solid var(--border);
+      padding: 18px; overflow: auto;
+    }
+    .kb-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .kb-head h2 { margin: 0; font-size: 18px; }
+    .kb-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .kb-filters input, .kb-filters select {
+      background: var(--panel-2); border: 1px solid var(--border); color: var(--fg);
+      border-radius: 10px; padding: 9px 11px; font-size: 13px; font-family: inherit;
+    }
+    .kb-filters input { flex: 1; min-width: 180px; }
+    .kb-stats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .kb-stat {
+      background: var(--panel-2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 10px 14px; min-width: 96px;
+    }
+    .kb-stat .n { font-size: 20px; font-weight: 800; }
+    .kb-stat .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .kb-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .kb-table th {
+      text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+      color: var(--muted); font-weight: 700; padding: 8px 10px; border-bottom: 1px solid var(--border);
+    }
+    .kb-table td { padding: 9px 10px; border-bottom: 1px solid rgba(38,44,58,.6); vertical-align: top; }
+    .kb-table tr:hover td { background: rgba(79,140,255,.06); }
+    .kb-domain { font-weight: 700; word-break: break-all; }
+    .kb-actions { display: flex; gap: 6px; justify-content: flex-end; }
+    .kb-actions button {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 8px; padding: 4px 9px; font-size: 12px; cursor: pointer; font-family: inherit;
+    }
+    .kb-actions button:hover { color: var(--fg); border-color: var(--accent); }
+    .kb-actions button.danger:hover { color: var(--bad); border-color: var(--bad); }
+    .kb-empty { padding: 30px 10px; text-align: center; }
+    .kb-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+    .kb-chip {
+      background: #2a313f; color: #c8d0e0; border-radius: 999px;
+      padding: 3px 8px; font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+
     .settings-panel {
       position: fixed; inset: 0; z-index: 90; display: none;
     }
@@ -263,6 +312,7 @@
       <span id="healthText">Checking...</span>
     </div>
     <div style="display:flex;gap:8px">
+      <button id="kbBtn" class="btn ghost">Knowledge</button>
       <button id="settingsBtn" class="btn ghost">Settings</button>
     </div>
   </header>
@@ -339,6 +389,34 @@
       </div>
     </section>
   </main>
+
+
+  <div class="kb-panel" id="kbPanel">
+    <div class="kb-backdrop" id="kbBackdrop"></div>
+    <div class="kb-drawer">
+      <div class="kb-head">
+        <h2>Knowledge base</h2>
+        <button id="kbClose" class="btn ghost">Close</button>
+      </div>
+
+      <div class="kb-filters">
+        <input id="kbSearch" type="search" placeholder="Search domains…" autocomplete="off" />
+        <select id="kbCms">
+          <option value="">All CMS</option>
+        </select>
+        <select id="kbType">
+          <option value="">All site types</option>
+        </select>
+        <button id="kbRefresh" class="btn ghost">Refresh</button>
+      </div>
+
+      <div class="kb-stats" id="kbStats"></div>
+
+      <div id="kbBody">
+        <div class="kb-empty empty">Loading knowledge base…</div>
+      </div>
+    </div>
+  </div>
 
   <div class="settings-panel" id="settingsPanel">
     <div class="settings-backdrop" id="settingsBackdrop"></div>
@@ -825,8 +903,146 @@
     function openModal() { $('modal').classList.add('open'); }
     function closeModal() { $('modal').classList.remove('open'); }
 
+
+    // ---- Knowledge base ----
+    let kbRows = [];
+
+    function openKb() { $('kbPanel').classList.add('open'); loadKnowledge(); }
+    function closeKb() { $('kbPanel').classList.remove('open'); }
+
+    function kbQuery() {
+      const q = $('kbSearch').value.trim().toLowerCase();
+      const cms = $('kbCms').value.trim().toLowerCase();
+      const type = $('kbType').value.trim().toLowerCase();
+      return kbRows.filter(d => {
+        if (q && !String(d.domain || '').toLowerCase().includes(q)) return false;
+        if (cms && String(d.cms || '').toLowerCase() !== cms) return false;
+        if (type && String(d.site_type || '').toLowerCase() !== type) return false;
+        return true;
+      });
+    }
+
+    function kbRefreshOptions() {
+      const cmsSet = new Set(), typeSet = new Set();
+      kbRows.forEach(d => {
+        if (d.cms) cmsSet.add(d.cms);
+        if (d.site_type) typeSet.add(d.site_type);
+      });
+      const fill = (sel, set, current) => {
+        const el = $(sel);
+        const first = el.options[0].outerHTML;
+        const opts = [...set].sort().map(v =>
+          `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+        el.innerHTML = first + opts;
+        el.value = [...set].includes(current) ? current : '';
+      };
+      fill('kbCms', cmsSet, $('kbCms').value);
+      fill('kbType', typeSet, $('kbType').value);
+    }
+
+    function kbAssetTotal(counts) {
+      if (!counts) return 0;
+      return Object.values(counts).reduce((a, b) => a + (Number(b) || 0), 0);
+    }
+
+    function kbChips(d) {
+      const bits = [];
+      if (d.cms) bits.push(d.cms);
+      if (d.site_type) bits.push(d.site_type);
+      if (d.category) bits.push(d.category);
+      if (!bits.length) return '<span class="empty">—</span>';
+      return '<div class="kb-chips">' + bits.map(b =>
+        `<span class="kb-chip">${escapeHtml(b)}</span>`).join('') + '</div>';
+    }
+
+    function renderKnowledge() {
+      const rows = kbQuery();
+      const totalAssets = kbRows.reduce((a, d) => a + kbAssetTotal(d.asset_counts), 0);
+      const totalArchives = kbRows.reduce((a, d) => a + (Number(d.archives) || 0), 0);
+      const withCms = kbRows.filter(d => d.cms).length;
+
+      $('kbStats').innerHTML = [
+        ['Domains', kbRows.length],
+        ['Archives', totalArchives],
+        ['Assets', totalAssets],
+        ['CMS detected', withCms],
+      ].map(([l, n]) =>
+        `<div class="kb-stat"><div class="n">${n}</div><div class="l">${l}</div></div>`
+      ).join('');
+
+      if (!kbRows.length) {
+        $('kbBody').innerHTML =
+          '<div class="kb-empty empty">No knowledge recorded yet. Archive a site to populate the knowledge base.</div>';
+        return;
+      }
+      if (!rows.length) {
+        $('kbBody').innerHTML =
+          '<div class="kb-empty empty">No domains match these filters.</div>';
+        return;
+      }
+
+      const body = rows.map(d => {
+        const assets = d.asset_counts || {};
+        const assetText = Object.entries(assets)
+          .map(([k, v]) => `${escapeHtml(k)} ${v}`).join(' · ') || '—';
+        const last = d.last_seen
+          ? new Date(d.last_seen).toLocaleString()
+          : '—';
+        return `<tr>
+          <td class="kb-domain">${escapeHtml(d.domain)}</td>
+          <td>${kbChips(d)}</td>
+          <td>${d.archives ?? 0}</td>
+          <td style="max-width:220px">${assetText}</td>
+          <td class="empty">${escapeHtml(last)}</td>
+          <td class="kb-actions">
+            <button data-domain="${escapeHtml(d.domain)}" class="kb-del danger">Delete</button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      $('kbBody').innerHTML = `<table class="kb-table">
+        <thead><tr>
+          <th>Domain</th><th>Detected</th><th>Archives</th>
+          <th>Assets</th><th>Last seen</th><th></th>
+        </tr></thead>
+        <tbody>${body}</tbody>
+      </table>`;
+
+      qsa('#kbBody .kb-del').forEach(btn => {
+        btn.onclick = async () => {
+          const domain = btn.dataset.domain;
+          if (!confirm(`Delete knowledge for ${domain}?`)) return;
+          const res = await api('/api/knowledge/' + encodeURIComponent(domain), {method: 'DELETE'});
+          if (!res.ok) { toast('Delete failed', domain); return; }
+          toast('Knowledge deleted', domain);
+          loadKnowledge();
+        };
+      });
+    }
+
+    async function loadKnowledge() {
+      $('kbBody').innerHTML = '<div class="kb-empty empty">Loading knowledge base…</div>';
+      try {
+        const res = await api('/api/knowledge');
+        const data = await res.json();
+        kbRows = data.domains || [];
+      } catch (e) {
+        $('kbBody').innerHTML =
+          `<div class="kb-empty empty">Could not load knowledge base: ${escapeHtml(String(e))}</div>`;
+        return;
+      }
+      kbRefreshOptions();
+      renderKnowledge();
+    }
+
     $('goBtn').onclick = go;
     qs('#url').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+
+    $('kbBtn').onclick = openKb;
+    $('kbClose').onclick = closeKb;
+    $('kbBackdrop').onclick = closeKb;
+    $('kbRefresh').onclick = loadKnowledge;
+    qsa('#kbSearch, #kbCms, #kbType').forEach(el => el.addEventListener('input', renderKnowledge));
 
     $('settingsBtn').onclick = openSettings;
     $('settingsClose').onclick = closeSettings;
