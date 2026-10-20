@@ -77,7 +77,7 @@ def create_app() -> Flask:
 
     @app.get("/health")
     def health():
-        return jsonify({"status": "ok", "service": "universal-downloader-pro", "version": "0.1.0"})
+        return jsonify({"status": "ok", "service": "universal-downloader-pro", "version": "1.0.0"})
 
     @app.get("/api/token")
     def token_info():
