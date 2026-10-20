@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **`THIRD_PARTY_NOTICES.md`.** The notices that `browser-cookie3` (LGPL)
+  and `tqdm` (MPL-2.0 AND MIT) require now travel with the software. Both
+  are used unmodified and imported from Python, so they do not impose a
+  licence on this project, but the notice obligation still has to be met.
+- **Licence gate.** `tests/test_licence_audit.py` fails the build when a
+  strong-copyleft dependency is declared or imported in this
+  permissively licensed repository, and when a weak-copyleft dependency's
+  licence notice is missing.
+- **`licence-check` CI job.** The licence gate runs on every push and on
+  every pull request, and is a required status check.
+
 ## [1.0.0] — 2026-10-20
 
 ### Added
