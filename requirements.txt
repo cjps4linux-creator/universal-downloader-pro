@@ -1,0 +1,26 @@
+# Universal Downloader Pro — runtime dependencies
+#
+# Generated from the [project.dependencies] table in pyproject.toml.
+# Keep the two files in sync: pyproject.toml is the source of truth.
+#
+# Install with:
+#   pip install -r requirements.txt
+
+flask==3.0.3
+flask-cors==4.0.1
+requests==2.32.3
+curl-cffi==0.5.2
+beautifulsoup4==4.12.3
+yt-dlp==2026.08.19
+nh3==0.2.17
+cryptography==42.0.8
+keyring==25.3.0
+tenacity==8.2.3
+tqdm==4.66.5
+pdfplumber==0.11.4
+python-docx==1.1.2
+werkzeug==3.0.4
+jinja2==3.1.4
+markupsafe==2.1.5
+sqlalchemy==2.0.36
+browser-cookie3==0.19.1
