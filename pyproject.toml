@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "universal-downloader-pro"
-version = "0.1.0"
+version = "1.0.0"
 description = "Production-grade offline archiver and media downloader with privacy tunnel, knowledge pipeline, and batch queue"
 readme = "README.md"
 license = { text = "MIT" }
