@@ -1,12 +1,16 @@
 @echo off
 setlocal
 
-set "PYTHON=C:\Users\user\Projects\universal-downloader-pro\.venv\Scripts\python.exe"
-set "APP_DIR=C:\Users\user\Projects\universal-downloader-pro\src"
+set "ROOT=%~dp0.."
+set "PYTHON="
+if exist "%ROOT%\.venv\Scripts\python.exe" set "PYTHON=%ROOT%\.venv\Scripts\python.exe"
+if not defined PYTHON if defined HERMES_PYTHON set "PYTHON=%HERMES_PYTHON%"
+if not defined PYTHON for %%P in (python.exe python) do if not defined PYTHON set "PYTHON=%%~$PATH:P"
+set "APP_DIR=%ROOT%\src"
 set "PORT=8765"
 set "HEALTH_URL=http://127.0.0.1:%PORT%/health"
 set "APP_URL=http://127.0.0.1:%PORT%/"
-set "PATH=%USERPROFILE%\Projects\universal-downloader-pro\.venv\Scripts;%PATH%"
+set "PATH=%ROOT%\.venv\Scripts;%PATH%"
 
 echo [launcher] Starting Universal Downloader Pro...
 
@@ -32,7 +36,7 @@ if errorlevel 1 (
 )
 
 echo [launcher] Initializing database...
-"%PYTHON%" "C:\Users\user\Projects\universal-downloader-pro\scripts\init_db.py"
+"%PYTHON%" "%ROOT%\scripts\init_db.py"
 if errorlevel 1 (
   echo [launcher] ERROR: database init failed
   pause

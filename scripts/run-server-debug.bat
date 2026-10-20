@@ -1,7 +1,11 @@
 @echo off
 setlocal
-set "PYTHON=C:\Users\user\Projects\universal-downloader-pro\.venv\Scripts\python.exe"
-set "APP_DIR=C:\Users\user\Projects\universal-downloader-pro\src"
+set "ROOT=%~dp0.."
+set "PYTHON="
+if exist "%ROOT%\.venv\Scripts\python.exe" set "PYTHON=%ROOT%\.venv\Scripts\python.exe"
+if not defined PYTHON if defined HERMES_PYTHON set "PYTHON=%HERMES_PYTHON%"
+if not defined PYTHON for %%P in (python.exe python) do if not defined PYTHON set "PYTHON=%%~$PATH:P"
+set "APP_DIR=%ROOT%\src"
 set "PORT=8765"
 
 echo [run] Using python: %PYTHON%
