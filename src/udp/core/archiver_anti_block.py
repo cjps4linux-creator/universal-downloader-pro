@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 
 from udp.core.anti_block import fetch_with_anti_block, BlockedError, BlockClass
 from udp.core.downloader import download_file, sha256_file
-from udp.models.db import Session, Job
+from udp.models.db import Job, session
 from udp.utils.paths import task_dir, ensure_dirs
 from udp.security.tunnel import tunnel_proxy_url
 
@@ -84,27 +84,27 @@ def _blocked_result(task_id: str, exc: BlockedError) -> dict:
 
 def _update_progress(task_id: str, percent: int, total: Optional[int] = None) -> None:
     try:
-        with Session() as session:
-            job = session.get(Job, task_id)
+        with session() as db:
+            job = db.get(Job, task_id)
             if job:
                 job.status = "running"
                 job.error_message = json.dumps({"percent": percent, "assets_total": total})
                 job.updated_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
-                session.commit()
+                db.commit()
     except Exception:
         pass
 
 
 def _finalize_job(task_id: str, status: str, dest: str, results: list[dict], failed: list[dict]) -> None:
     try:
-        with Session() as session:
-            job = session.get(Job, task_id)
+        with session() as db:
+            job = db.get(Job, task_id)
             if job:
                 job.status = status
                 job.dest_path = dest
                 job.finished_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
                 job.error_message = json.dumps({"assets_ok": sum(1 for r in results if r["status"] == "ok"), "assets_failed": len(failed)})
-                session.commit()
+                db.commit()
     except Exception:
         pass
 

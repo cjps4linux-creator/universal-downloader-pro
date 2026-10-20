@@ -7,7 +7,7 @@ from pathlib import Path
 
 from flask import Blueprint, jsonify, request, send_file
 
-from udp.models.db import Session, Setting, Job
+from udp.models.db import Setting, Job, session
 from udp.utils.paths import downloads_dir
 from udp.security.tunnel import set_proxy_url, egress_ip, dns_leak_test, tunnel_port, tunnel_proxy_url
 from udp.security.firewall import allow_loopback, block_egress_except_tunnel
@@ -18,8 +18,8 @@ bp = Blueprint("system", __name__)
 
 @bp.get("/api/settings")
 def get_settings():
-    with Session() as session:
-        rows = session.query(Setting).all()
+    with session() as db:
+        rows = db.query(Setting).all()
         return jsonify({r.key: r.value for r in rows})
 
 
@@ -28,14 +28,14 @@ def put_settings():
     body = request.get_json(silent=True) or {}
     if not isinstance(body, dict):
         return jsonify({"error": "settings must be a JSON object"}), 400
-    with Session() as session:
+    with session() as db:
         for key, value in body.items():
-            row = session.get(Setting, key)
+            row = db.get(Setting, key)
             if row:
                 row.value = str(value)
             else:
-                session.add(Setting(key=str(key), value=str(value)))
-        session.commit()
+                db.add(Setting(key=str(key), value=str(value)))
+        db.commit()
     return jsonify({"updated": list(body.keys())})
 
 
@@ -44,8 +44,8 @@ def get_history():
     status = (request.args.get("status") or "").strip().lower()
     mode = (request.args.get("mode") or "").strip().lower()
     q = (request.args.get("q") or "").strip().lower()
-    with Session() as session:
-        query = session.query(Job)
+    with session() as db:
+        query = db.query(Job)
         if status:
             query = query.filter(Job.status == status)
         if mode:
@@ -80,8 +80,8 @@ def export_manifest():
     task_id = (body.get("task_id") or "").strip()
     if fmt not in {"json", "csv", "md"}:
         return jsonify({"error": "unsupported format"}), 400
-    with Session() as session:
-        job = session.get(Job, task_id) if task_id else None
+    with session() as db:
+        job = db.get(Job, task_id) if task_id else None
         if not job:
             return jsonify({"error": "task_id required and must exist"}), 400
         payload = {
@@ -189,8 +189,8 @@ def file_actions():
     task_id = (request.args.get("task_id") or "").strip()
     if not task_id:
         return jsonify({"error": "task_id required"}), 400
-    with Session() as session:
-        job = session.get(Job, task_id)
+    with session() as db:
+        job = db.get(Job, task_id)
         if not job:
             return jsonify({"error": "not found"}), 404
         dest = Path(job.dest_path) if job.dest_path else None
@@ -218,8 +218,8 @@ def open_folder():
     task_id = (body.get("task_id") or "").strip()
     if not task_id:
         return jsonify({"error": "task_id required"}), 400
-    with Session() as session:
-        job = session.get(Job, task_id)
+    with session() as db:
+        job = db.get(Job, task_id)
         if not job or not job.dest_path:
             return jsonify({"error": "not found"}), 404
         dest = Path(job.dest_path)
@@ -243,8 +243,8 @@ def reveal_file():
     task_id = (body.get("task_id") or "").strip()
     if not task_id:
         return jsonify({"error": "task_id required"}), 400
-    with Session() as session:
-        job = session.get(Job, task_id)
+    with session() as db:
+        job = db.get(Job, task_id)
         if not job or not job.dest_path:
             return jsonify({"error": "not found"}), 404
         dest = Path(job.dest_path)

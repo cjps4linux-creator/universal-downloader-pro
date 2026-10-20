@@ -8,7 +8,7 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 
-from udp.models.db import Session, Job
+from udp.models.db import Job, session
 from udp.utils.paths import downloads_dir, ensure_dirs
 
 ensure_dirs()
@@ -131,8 +131,8 @@ def stream_with_ytdlp(url: str, dest: Path, job_id: str, *, cookies: Optional[st
         # DEBUG: Write to file to see what's happening
         with open("C:/tmp/ytdlp_debug.log", "a") as df:
             df.write(f"JOB {job_id}: entering session block, filename={filename}\n")
-        with Session() as session:
-            job = session.get(Job, job_id)
+        with session() as db:
+            job = db.get(Job, job_id)
             if job:
                 with open("C:/tmp/ytdlp_debug.log", "a") as df:
                     df.write(f"JOB {job_id}: got job object, meta title={meta.get('title')}\n")
@@ -157,7 +157,7 @@ def stream_with_ytdlp(url: str, dest: Path, job_id: str, *, cookies: Optional[st
                         pass
                 if meta.get("thumbnail"):
                     job.stream_thumbnail = meta["thumbnail"][:2048]
-                session.commit()
+                db.commit()
                 print(f"[DEBUG] Session committed successfully for job {job_id}")
     except Exception as exc:
         print(f"[DEBUG] Exception in session block: {exc}")
@@ -169,20 +169,20 @@ def stream_with_ytdlp(url: str, dest: Path, job_id: str, *, cookies: Optional[st
 
 def _update_stream_progress(job_id: str, percent: float) -> None:
     try:
-        with Session() as session:
-            job = session.get(Job, job_id)
+        with session() as db:
+            job = db.get(Job, job_id)
             if job:
                 job.progress = float(percent)
                 job.updated_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
-                session.commit()
+                db.commit()
     except Exception:
         pass
 
 
 def _finalize(job_id: str, status: str, dest: str, error_message: Optional[str] = None) -> None:
     try:
-        with Session() as session:
-            job = session.get(Job, job_id)
+        with session() as db:
+            job = db.get(Job, job_id)
             if job:
                 job.status = status
                 # Only update dest_path if it's a directory (not a file path already set)
@@ -193,7 +193,7 @@ def _finalize(job_id: str, status: str, dest: str, error_message: Optional[str] 
                     job.dest_path = dest
                 job.error_message = error_message
                 job.finished_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
-                session.commit()
+                db.commit()
     except Exception:
         pass
 

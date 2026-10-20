@@ -12,7 +12,7 @@ from udp.api.routes.knowledge import bp as knowledge_bp
 from udp.api.routes.system import bp as system_bp
 from udp.api.routes.archive import bp as archive_bp
 from udp.security.middleware import register_security
-from udp.models.db import init_db
+from udp.models.db import init_db, session
 from pathlib import Path
 
 

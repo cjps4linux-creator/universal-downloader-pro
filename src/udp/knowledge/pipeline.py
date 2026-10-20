@@ -6,15 +6,15 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from udp.models.db import Session, Job, KnowledgeDomain
+from udp.models.db import Job, KnowledgeDomain, session
 from udp.utils.paths import downloads_dir, ensure_dirs
 
 
 def export_training(task_ids: Optional[list[str]] = None, from_history: bool = False) -> Path:
     ensure_dirs()
     out = downloads_dir() / "training_export.jsonl"
-    with Session() as session, out.open("w", encoding="utf-8") as fh:
-        query = session.query(Job)
+    with session() as db, out.open("w", encoding="utf-8") as fh:
+        query = db.query(Job)
         if task_ids:
             query = query.filter(Job.id.in_(task_ids))
         elif from_history:
@@ -37,8 +37,8 @@ def build_playbook() -> Path:
     ensure_dirs()
     out = downloads_dir() / "playbook.md"
     lines = ["# Universal Downloader Pro — Site Playbook", ""]
-    with Session() as session:
-        for d in session.query(KnowledgeDomain).order_by(KnowledgeDomain.domain).all():
+    with session() as db:
+        for d in db.query(KnowledgeDomain).order_by(KnowledgeDomain.domain).all():
             lines.append(f"## {d.domain}")
             lines.append(f"- last_seen: {d.last_seen.isoformat() if d.last_seen else 'never'}")
             lines.append(f"- type: {d.site_type or 'unknown'}")

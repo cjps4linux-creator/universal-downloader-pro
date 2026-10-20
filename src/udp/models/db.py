@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 
 from sqlalchemy import (
@@ -18,9 +20,23 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 from udp.utils.paths import data_dir
 
-DB_PATH = data_dir() / "udp.db"
+# The database location is overridable so that tests (and any future
+# multi-tenant or containerised deployment) can point at a throwaway file
+# instead of the user's live database. Everything that needs a session must
+# resolve it through session() below rather than importing Session directly,
+# otherwise the override is bypassed.
+DB_PATH = Path(os.environ.get("UDP_DB_PATH") or (data_dir() / "udp.db"))
 ENGINE = create_engine(f"sqlite:///{DB_PATH}", echo=False, future=True)
 Session = sessionmaker(ENGINE, future=True)
+
+
+def session():
+    """Return a new session bound to the *current* ENGINE.
+
+    Modules must call this rather than importing Session, so that
+    reconfiguring ENGINE (as the test-suite does) is always honoured.
+    """
+    return Session()
 
 
 class Base(DeclarativeBase):

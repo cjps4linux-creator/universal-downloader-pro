@@ -7,7 +7,7 @@ from pathlib import Path
 
 from flask import Blueprint, Response, jsonify, request, send_from_directory
 
-from udp.models.db import Session, Job
+from udp.models.db import Job, session
 from udp.security.sanitizer import (
     archive_safe_headers,
     sanitize_html,
@@ -24,8 +24,8 @@ ensure_dirs()
 
 @bp.get("/api/archives/<task_id>")
 def get_archive(task_id: str):
-    with Session() as session:
-        job = session.get(Job, task_id)
+    with session() as db:
+        job = db.get(Job, task_id)
         if not job or not job.dest_path:
             return jsonify({"error": "not found"}), 404
         root = task_dir(task_id)
@@ -166,8 +166,8 @@ def get_failed_assets(task_id: str):
 
 @bp.post("/api/archives/<task_id>/salvage")
 def salvage_archive(task_id: str):
-    with Session() as session:
-        job = session.get(Job, task_id)
+    with session() as db:
+        job = db.get(Job, task_id)
         if not job:
             return jsonify({"error": "not found"}), 404
         root = task_dir(task_id)
@@ -176,7 +176,7 @@ def salvage_archive(task_id: str):
             return jsonify({"error": "not an archive job"}), 400
         job.status = "salvaging"
         job.error_message = None
-        session.commit()
+        db.commit()
     submit(_salvage_worker, task_id)
     return jsonify({"task_id": task_id, "status": "salvaging"}), 202
 

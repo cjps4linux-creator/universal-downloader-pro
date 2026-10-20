@@ -10,7 +10,7 @@ from typing import Optional
 from curl_cffi import requests as curl_requests
 
 from udp.core.anti_block import _supported_impersonate
-from udp.models.db import Session, Job
+from udp.models.db import Job, session
 from udp.utils.paths import downloads_dir, ensure_dirs
 
 ensure_dirs()
@@ -159,11 +159,11 @@ def download_file(url: str, dest: Path, job_id: str, *, resume: bool = True, pro
 
 def _update_job_progress(job_id: str, bytes_done: int) -> None:
     try:
-        with Session() as session:
-            job = session.get(Job, job_id)
+        with session() as db:
+            job = db.get(Job, job_id)
             if job:
                 job.bytes_done = bytes_done
                 job.updated_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
-                session.commit()
+                db.commit()
     except Exception:
         pass

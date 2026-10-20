@@ -7,7 +7,7 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
-from udp.models.db import Session, Job
+from udp.models.db import Job, session
 from udp.utils.paths import ensure_dirs
 
 ensure_dirs()
@@ -78,13 +78,13 @@ def run_stream_job_with_cookies(url: str, dest: Path, job_id: str, *, cookies: O
 
 def _finalize(job_id: str, status: str, dest: str, error_message: Optional[str] = None) -> None:
     try:
-        with Session() as session:
-            job = session.get(Job, job_id)
+        with session() as db:
+            job = db.get(Job, job_id)
             if job:
                 job.status = status
                 job.dest_path = dest
                 job.error_message = error_message
                 job.finished_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
-                session.commit()
+                db.commit()
     except Exception:
         pass

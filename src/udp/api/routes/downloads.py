@@ -14,7 +14,7 @@ from udp.core.downloader import download_file
 from udp.core.browser_cookies import load_browser_cookies_for_url
 from udp.core.assets import part_path, resume_bytes, unique_dest_path
 from udp.workers.scheduler import submit, run_stream_job, run_archive_job, run_archive_job_anti_block, run_stream_job_with_cookies, cancel_job, worker_count
-from udp.models.db import Session, Job
+from udp.models.db import Job, session
 from udp.utils.paths import downloads_dir, task_dir, ensure_dirs
 
 bp = Blueprint("downloads", __name__)
@@ -75,7 +75,7 @@ def download():
     task_id = uuid.uuid4().hex[:12]
     dest_dir = downloads_dir()
 
-    with Session() as session:
+    with session() as db:
         job = Job(
             id=task_id,
             url=url,
@@ -83,8 +83,8 @@ def download():
             status="queued",
             dest_path="",
         )
-        session.add(job)
-        session.commit()
+        db.add(job)
+        db.commit()
 
     if mode == "archive" or mode == "web":
         tier = int((body.get("tier") or 0))
@@ -111,7 +111,7 @@ def download():
             print("[DEBUG] Stream dual mode requested")
             # Job 1: Video (best quality)
             video_task_id = uuid.uuid4().hex[:12]
-            with Session() as session:
+            with session() as db:
                 job = Job(
                     id=video_task_id,
                     url=url,
@@ -119,18 +119,18 @@ def download():
                     status="queued",
                     dest_path="",
                 )
-                session.add(job)
-                session.commit()
+                db.add(job)
+                db.commit()
             submit(run_stream_job_with_cookies, url, dest_dir, video_task_id, cookies=cookies, browser=browser, audio_only=False, playlist=False)
-            with Session() as session:
-                job = session.get(Job, video_task_id)
+            with session() as db:
+                job = db.get(Job, video_task_id)
                 if job:
                     job.status = "running"
-                    session.commit()
+                    db.commit()
 
             # Job 2: Audio (FLAC or selected format)
             audio_task_id = uuid.uuid4().hex[:12]
-            with Session() as session:
+            with session() as db:
                 job = Job(
                     id=audio_task_id,
                     url=url,
@@ -138,14 +138,14 @@ def download():
                     status="queued",
                     dest_path="",
                 )
-                session.add(job)
-                session.commit()
+                db.add(job)
+                db.commit()
             submit(run_stream_job_with_cookies, url, dest_dir, audio_task_id, cookies=cookies, browser=browser, audio_only=True, playlist=False, audio_format=audio_format)
-            with Session() as session:
-                job = session.get(Job, audio_task_id)
+            with session() as db:
+                job = db.get(Job, audio_task_id)
                 if job:
                     job.status = "running"
-                    session.commit()
+                    db.commit()
 
             # Return both task IDs
             return jsonify({
@@ -162,11 +162,11 @@ def download():
 
         # Regular single stream job
         submit(run_stream_job_with_cookies, url, dest_dir, task_id, cookies=cookies, browser=browser, audio_only=audio_only, playlist=playlist, audio_format=audio_format)
-        with Session() as session:
-            job = session.get(Job, task_id)
+        with session() as db:
+            job = db.get(Job, task_id)
             if job:
                 job.status = "running"
-                session.commit()
+                db.commit()
 
     elif mode == "dual":
             print("[DEBUG] Entered dual mode branch")
@@ -177,7 +177,7 @@ def download():
 
             # Job 1: Video (best quality)
             video_task_id = uuid.uuid4().hex[:12]
-            with Session() as session:
+            with session() as db:
                 job = Job(
                     id=video_task_id,
                     url=url,
@@ -185,18 +185,18 @@ def download():
                     status="queued",
                     dest_path="",
                 )
-                session.add(job)
-                session.commit()
+                db.add(job)
+                db.commit()
             submit(run_stream_job_with_cookies, url, dest_dir, video_task_id, cookies=cookies, browser=browser, audio_only=False, playlist=False)
-            with Session() as session:
-                job = session.get(Job, video_task_id)
+            with session() as db:
+                job = db.get(Job, video_task_id)
                 if job:
                     job.status = "running"
-                    session.commit()
+                    db.commit()
 
             # Job 2: Audio (FLAC)
             audio_task_id = uuid.uuid4().hex[:12]
-            with Session() as session:
+            with session() as db:
                 job = Job(
                     id=audio_task_id,
                     url=url,
@@ -204,14 +204,14 @@ def download():
                     status="queued",
                     dest_path="",
                 )
-                session.add(job)
-                session.commit()
+                db.add(job)
+                db.commit()
             submit(run_stream_job_with_cookies, url, dest_dir, audio_task_id, cookies=cookies, browser=browser, audio_only=True, playlist=False, audio_format=audio_format)
-            with Session() as session:
-                job = session.get(Job, audio_task_id)
+            with session() as db:
+                job = db.get(Job, audio_task_id)
                 if job:
                     job.status = "running"
-                    session.commit()
+                    db.commit()
 
             # Return both task IDs
             return jsonify({
@@ -232,21 +232,21 @@ def download():
         try:
             _, err = download_file(url, dest, task_id)
             status = "failed" if err else "succeeded"
-            with Session() as session:
-                job = session.get(Job, task_id)
+            with session() as db:
+                job = db.get(Job, task_id)
                 if job:
                     job.status = status
                     job.error_message = err
                     job.finished_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
-                    session.commit()
+                    db.commit()
         except Exception as exc:
-            with Session() as session:
-                job = session.get(Job, task_id)
+            with session() as db:
+                job = db.get(Job, task_id)
                 if job:
                     job.status = "failed"
                     job.error_message = str(exc)
                     job.finished_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
-                    session.commit()
+                    db.commit()
 
     return jsonify({
         "task_id": task_id,
@@ -259,8 +259,8 @@ def download():
 
 @bp.get("/api/jobs/<task_id>/detail")
 def job_detail(task_id: str):
-    with Session() as session:
-        job = session.get(Job, task_id)
+    with session() as db:
+        job = db.get(Job, task_id)
         if not job:
             return jsonify({"error": "not found"}), 404
         progress = None
@@ -392,8 +392,8 @@ def _guess_asset_kind(name: str) -> str:
 
 @bp.get("/api/jobs/<task_id>")
 def job_status(task_id: str):
-    with Session() as session:
-        job = session.get(Job, task_id)
+    with session() as db:
+        job = db.get(Job, task_id)
         if not job:
             return jsonify({"error": "not found"}), 404
         progress = None
@@ -432,8 +432,8 @@ def stream_job(task_id: str):
     def generate():
         last_payload = None
         while True:
-            with Session() as session:
-                job = session.get(Job, task_id)
+            with session() as db:
+                job = db.get(Job, task_id)
                 if not job:
                     yield "event: error\ndata: not found\n\n"
                     break
@@ -497,10 +497,10 @@ def batch_download():
         ensure_dirs()
         task_id = uuid.uuid4().hex[:12]
         dest = unique_dest_path(downloads_dir() / f"{task_id}_download")
-        with Session() as session:
+        with session() as db:
             job = Job(id=task_id, url=url, mode=resolved_mode, status="queued", dest_path=str(dest))
-            session.add(job)
-            session.commit()
+            db.add(job)
+            db.commit()
         try:
             if resolved_mode in {"archive", "web"}:
                 tier = int((body.get("tier") or 0))
@@ -514,32 +514,32 @@ def batch_download():
                             audio_format = (body.get("audio_format") or "mp3").strip().lower()
                             playlist = bool(body.get("playlist"))
                             submit(run_stream_job_with_cookies, url, dest, task_id, cookies=cookies, browser=browser, audio_only=audio_only, playlist=playlist, audio_format=audio_format)
-                            with Session() as session:
-                                job = session.get(Job, task_id)
+                            with session() as db:
+                                job = db.get(Job, task_id)
                                 if job:
                                     job.status = "running"
-                                    session.commit()
+                                    db.commit()
             else:
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 _, err = download_file(url, dest, task_id)
                 status = "failed" if err else "succeeded"
-                with Session() as session:
-                    job = session.get(Job, task_id)
+                with session() as db:
+                    job = db.get(Job, task_id)
                     if job:
                         job.status = status
                         job.error_message = err
                         job.finished_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
-                        session.commit()
+                        db.commit()
                 results.append({"url": url, "task_id": task_id, "status": status, "dest": str(dest), "error": err})
                 continue
         except Exception as exc:
-            with Session() as session:
-                job = session.get(Job, task_id)
+            with session() as db:
+                job = db.get(Job, task_id)
                 if job:
                     job.status = "failed"
                     job.error_message = str(exc)
                     job.finished_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
-                    session.commit()
+                    db.commit()
             results.append({"url": url, "task_id": task_id, "status": "failed", "dest": str(dest), "error": str(exc)})
             continue
         results.append({"url": url, "task_id": task_id, "status": "queued", "mode": resolved_mode, "dest": str(dest)})
@@ -586,8 +586,8 @@ mime_map = {
 
 @bp.get("/api/stream/<task_id>/play")
 def play_stream(task_id: str):
-    with Session() as session:
-        job = session.get(Job, task_id)
+    with session() as db:
+        job = db.get(Job, task_id)
         if not job:
             return jsonify({"error": "not found"}), 404
         if job.mode != "stream":
@@ -606,8 +606,8 @@ def play_stream(task_id: str):
 
 @bp.get("/api/stream/<task_id>/download")
 def download_stream(task_id: str):
-    with Session() as session:
-        job = session.get(Job, task_id)
+    with session() as db:
+        job = db.get(Job, task_id)
         if not job:
             return jsonify({"error": "not found"}), 404
         if job.mode != "stream":
@@ -623,8 +623,8 @@ def download_stream(task_id: str):
 
 @bp.get("/api/jobs/<task_id>/resume")
 def resume_status(task_id: str):
-    with Session() as session:
-        job = session.get(Job, task_id)
+    with session() as db:
+        job = db.get(Job, task_id)
         if not job:
             return jsonify({"error": "not found"}), 404
         dest = Path(job.dest_path) if job.dest_path else None
@@ -641,8 +641,8 @@ def resume_status(task_id: str):
 
 @bp.post("/api/jobs/<task_id>/retry")
 def retry_job(task_id: str):
-    with Session() as session:
-        job = session.get(Job, task_id)
+    with session() as db:
+        job = db.get(Job, task_id)
         if not job:
             return jsonify({"error": "not found"}), 404
         dest = Path(job.dest_path) if job.dest_path else downloads_dir() / f"{task_id}_download"
@@ -651,7 +651,7 @@ def retry_job(task_id: str):
         job.error_code = None
         job.bytes_done = resume_bytes(part_path(dest))
         job.finished_at = None
-        session.commit()
+        db.commit()
         if job.mode == "archive":
             submit(run_archive_job, job.url, task_id)
         elif job.mode == "stream":
@@ -666,18 +666,18 @@ def _retry_direct(url: str, dest: Path, job_id: str) -> None:
     try:
         _, err = download_file(url, dest, job_id)
         status = "failed" if err else "succeeded"
-        with Session() as session:
-            job = session.get(Job, job_id)
+        with session() as db:
+            job = db.get(Job, job_id)
             if job:
                 job.status = status
                 job.error_message = err
                 job.finished_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
-                session.commit()
+                db.commit()
     except Exception as exc:
-        with Session() as session:
-            job = session.get(Job, job_id)
+        with session() as db:
+            job = db.get(Job, job_id)
             if job:
                 job.status = "failed"
                 job.error_message = str(exc)
                 job.finished_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
-                session.commit()
+                db.commit()

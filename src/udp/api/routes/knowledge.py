@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from flask import Blueprint, jsonify, request
 
-from udp.models.db import Session, KnowledgeDomain
+from udp.models.db import KnowledgeDomain, session
 
 bp = Blueprint("knowledge", __name__)
 
@@ -14,8 +14,8 @@ def list_knowledge():
     q = (request.args.get("q") or "").strip().lower()
     cms = (request.args.get("cms") or "").strip().lower()
     site_type = (request.args.get("site_type") or "").strip().lower()
-    with Session() as session:
-        query = session.query(KnowledgeDomain)
+    with session() as db:
+        query = db.query(KnowledgeDomain)
         results = []
         for d in query.all():
             if q and q not in d.domain.lower():
@@ -39,10 +39,10 @@ def list_knowledge():
 
 @bp.delete("/api/knowledge/<domain>")
 def delete_knowledge(domain: str):
-    with Session() as session:
-        row = session.get(KnowledgeDomain, domain)
+    with session() as db:
+        row = db.get(KnowledgeDomain, domain)
         if not row:
             return jsonify({"error": "not found"}), 404
-        session.delete(row)
-        session.commit()
+        db.delete(row)
+        db.commit()
     return jsonify({"deleted": domain})
