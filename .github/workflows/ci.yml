@@ -55,3 +55,16 @@ jobs:
         run: npm install --no-save --no-fund --no-audit jsdom@25
       - name: Run frontend DOM tests
         run: node tests/frontend/kb-panel.test.js
+
+  pin-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check dependency pins
+        # Fails the build on a pre-release version specifier or a
+        # toolchain version that has drifted from the validated pins.
+        # See scripts/pin_guard.py.
+        run: python scripts/pin_guard.py .

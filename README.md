@@ -3,6 +3,7 @@
 <p align="center"><b>Production-grade offline archiver and media downloader with a privacy-first tunnel, knowledge pipeline and batch queue.</b></p>
 
 <p align="center">
+  <a href="https://github.com/cjps4linux-creator/universal-downloader-pro/actions/workflows/ci.yml"><img src="https://github.com/cjps4linux-creator/universal-downloader-pro/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/license-MIT-0a7563" alt="License: MIT">
   <img src="https://img.shields.io/badge/python-3.11%2B-3776ab" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/platform-Windows-8a5800" alt="Platform: Windows">

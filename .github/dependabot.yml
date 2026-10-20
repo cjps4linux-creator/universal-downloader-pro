@@ -1,0 +1,68 @@
+# Dependabot configuration
+#
+# This project pins every dependency to an exact version. That is a
+# deliberate decision, not an oversight: see ADR-005 in the specification
+# repository. Pinned versions make a release reproducible, and the
+# published test suite is the proof that a given set of versions works.
+#
+# Dependabot therefore proposes updates and never applies them. Each
+# proposed change must be reviewed, and the full suite must be re-run
+# against the new versions before it is merged.
+#
+# Pre-release versions are excluded. A beta pin is not a reproducible
+# release, and a dependency bump that silently moves a project onto a
+# pre-release is exactly the kind of change that must be a deliberate
+# decision rather than an automated one.
+version: 2
+
+updates:
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Johannesburg
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - needs-review
+    commit-message:
+      prefix: "chore(deps)"
+    # Only ONE ignore block is permitted per update. Listing the same key
+    # twice makes the second overwrite the first, which silently drops the
+    # exclusions. The pre-release guard lives in the exclusion below.
+    ignore:
+      # The test toolchain is pinned for a reason and is version-bumped
+      # deliberately, one release at a time, with the suite re-run.
+      - dependency-name: "pytest"
+      - dependency-name: "pytest-cov"
+      - dependency-name: "ruff"
+    groups:
+      pip:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Johannesburg
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - needs-review
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      npm:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
