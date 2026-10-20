@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from udp.utils.paths import downloads_dir, task_dir, ensure_dirs
+from udp.utils.paths import downloads_dir, ensure_dirs
 
 ensure_dirs()
 

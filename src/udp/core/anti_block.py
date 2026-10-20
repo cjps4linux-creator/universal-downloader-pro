@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import secrets
 from enum import Enum
 from typing import Optional
 
@@ -55,7 +54,6 @@ def classify_response(status_code: int, text: str, retry_after: Optional[str] = 
 
 def _supported_impersonate() -> str:
     try:
-        import curl_cffi
         candidates = ["chrome120", "chrome110", "chrome"]
         for candidate in candidates:
             try:

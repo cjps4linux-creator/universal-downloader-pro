@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import os
-import sys
 import secrets
 from functools import wraps
 from typing import Callable
 
-from flask import Flask, Request, Response, jsonify, request
+from flask import Flask, Response, jsonify, request
 from udp.utils.network import is_private_ip, resolve_host
 
 _VENV_PYTHON = os.path.expandvars(r"%USERPROFILE%\\Projects\\universal-downloader-pro\\.venv\\Scripts\\python.exe")

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import html
-import os
 import re
 from pathlib import Path
 from typing import Optional
@@ -14,7 +12,7 @@ try:
 except Exception:
     HAS_NH3 = False
 
-from udp.utils.paths import downloads_dir, task_dir, ensure_dirs
+from udp.utils.paths import downloads_dir, ensure_dirs
 
 ensure_dirs()
 

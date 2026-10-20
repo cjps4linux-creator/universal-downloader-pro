@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import ipaddress
 import socket
-from typing import Optional
 from urllib.parse import urlparse
 
 _BLOCKED = {"localhost", "127.0.0.1", "0.0.0.0", "169.254.169.254", "[::1]"}

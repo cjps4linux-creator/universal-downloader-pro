@@ -7,13 +7,10 @@ report unavailable unless an externally provided proxy URL is configured.
 
 from __future__ import annotations
 
-import json
 import os
 import secrets
 import shutil
 import socket
-import subprocess
-import threading
 import time
 from pathlib import Path
 from typing import Optional

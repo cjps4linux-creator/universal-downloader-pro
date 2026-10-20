@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import os
 import re
 import secrets
 from pathlib import Path
@@ -14,7 +13,7 @@ from bs4 import BeautifulSoup
 from udp.core.anti_block import fetch_with_anti_block, BlockedError, BlockClass
 from udp.core.downloader import download_file, sha256_file
 from udp.models.db import Session, Job
-from udp.utils.paths import downloads_dir, task_dir, ensure_dirs
+from udp.utils.paths import task_dir, ensure_dirs
 from udp.security.tunnel import tunnel_proxy_url
 
 ensure_dirs()

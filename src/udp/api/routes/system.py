@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 import os
-import uuid
 from pathlib import Path
-from typing import Optional
 
 from flask import Blueprint, jsonify, request, send_file
 
 from udp.models.db import Session, Setting, Job
-from udp.utils.paths import data_dir, downloads_dir, ensure_dirs
-from udp.security.tunnel import set_proxy_url, ensure_tunnel, stop_tunnel, egress_ip, dns_leak_test, tunnel_running, tunnel_port, tunnel_proxy_url
+from udp.utils.paths import downloads_dir
+from udp.security.tunnel import set_proxy_url, egress_ip, dns_leak_test, tunnel_port, tunnel_proxy_url
 from udp.security.firewall import allow_loopback, block_egress_except_tunnel
 from udp.security.ssrf import validate_url, resolve_and_validate
 

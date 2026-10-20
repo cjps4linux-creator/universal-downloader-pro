@@ -3,20 +3,15 @@
 from __future__ import annotations
 
 import hashlib
-import os
-import secrets
 import time
 from pathlib import Path
 from typing import Optional
 
-import requests
 from curl_cffi import requests as curl_requests
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from udp.core.anti_block import _supported_impersonate
 from udp.models.db import Session, Job
 from udp.utils.paths import downloads_dir, ensure_dirs
-from udp.utils.network import resolve_host, is_private_ip
 
 ensure_dirs()
 

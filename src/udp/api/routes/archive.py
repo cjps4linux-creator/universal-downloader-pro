@@ -3,27 +3,17 @@
 from __future__ import annotations
 
 import json
-import os
-import socket
-import threading
-import time
 from pathlib import Path
-from typing import Optional
 
 from flask import Blueprint, Response, jsonify, request, send_from_directory
 
 from udp.models.db import Session, Job
 from udp.security.sanitizer import (
-    ALLOWED_PROTOCOLS,
-    ALLOWED_TAGS,
-    archive_origin_port,
     archive_safe_headers,
-    is_archive_origin_request,
-    sanitize_filename,
     sanitize_html,
     validate_archive_path,
 )
-from udp.utils.paths import downloads_dir, task_dir, ensure_dirs
+from udp.utils.paths import task_dir, ensure_dirs
 from udp.core.assets import unique_dest_path
 from udp.core.downloader import circuit, download_file
 from udp.workers.scheduler import submit, _finalize
@@ -90,7 +80,6 @@ def archive_preview(task_id: str):
 
 @bp.get("/api/firewall/commands")
 def firewall_commands():
-    from udp.security.firewall import allow_loopback, block_egress_except_tunnel
     port_raw = request.args.get("port")
     port = None
     if port_raw and port_raw.isdigit():
@@ -101,9 +90,9 @@ def firewall_commands():
             'netsh advfirewall firewall add rule name="UDP Block Egress" dir=out action=block remoteip=any localip!=127.0.0.1 profile=private',
         ], "note": "Provide a tunnel port to generate an allow rule for that proxy port."})
     cmds = [
-        f'netsh advfirewall firewall add rule name="UDP Allow Loopback" dir=out action=allow protocol=any localip=127.0.0.1 profile=private',
+        'netsh advfirewall firewall add rule name="UDP Allow Loopback" dir=out action=allow protocol=any localip=127.0.0.1 profile=private',
         f'netsh advfirewall firewall add rule name="UDP Allow Proxy" dir=out action=allow protocol=TCP,UDP localport={port} profile=private',
-        f'netsh advfirewall firewall add rule name="UDP Block Egress" dir=out action=block remoteip=any localip!=127.0.0.1 profile=private',
+        'netsh advfirewall firewall add rule name="UDP Block Egress" dir=out action=block remoteip=any localip!=127.0.0.1 profile=private',
     ]
     return jsonify({"commands": cmds, "port": port})
 

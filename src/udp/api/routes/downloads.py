@@ -8,17 +8,13 @@ import re
 from pathlib import Path
 from typing import Optional
 
-from flask import Flask, Blueprint, jsonify, request, send_file, send_from_directory
+from flask import Blueprint, jsonify, request, send_file
 
 from udp.core.downloader import download_file
-from udp.core.archiver import archive_web_page
-from udp.core.archiver_anti_block import archive_web_page_anti_block
-from udp.core.anti_block import BlockClass, classify_response, fetch_with_anti_block
 from udp.core.browser_cookies import load_browser_cookies_for_url
-from udp.core.assets import part_path, resume_bytes, move_part_to_final, unique_dest_path
+from udp.core.assets import part_path, resume_bytes, unique_dest_path
 from udp.workers.scheduler import submit, run_stream_job, run_archive_job, run_archive_job_anti_block, run_stream_job_with_cookies, cancel_job, worker_count
-from udp.workers.ytdlp import extract_info
-from udp.models.db import Session, Job, KnowledgeDomain
+from udp.models.db import Session, Job
 from udp.utils.paths import downloads_dir, task_dir, ensure_dirs
 
 bp = Blueprint("downloads", __name__)
@@ -112,7 +108,7 @@ def download():
 
         # If dual mode requested, create two jobs: video + audio
         if dual_mode:
-            print(f"[DEBUG] Stream dual mode requested")
+            print("[DEBUG] Stream dual mode requested")
             # Job 1: Video (best quality)
             video_task_id = uuid.uuid4().hex[:12]
             with Session() as session:
@@ -173,7 +169,7 @@ def download():
                 session.commit()
 
     elif mode == "dual":
-            print(f"[DEBUG] Entered dual mode branch")
+            print("[DEBUG] Entered dual mode branch")
             # Download both video and audio (FLAC)
             cookies = body.get("cookies")
             browser = (body.get("cookies_from_browser") or "").strip() or None

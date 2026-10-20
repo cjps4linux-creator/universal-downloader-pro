@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import os
 import re
 import secrets
 from pathlib import Path
@@ -16,15 +15,13 @@ from udp.core.downloader import download_file
 from udp.core.assets import store_asset, sha256_file
 from udp.models.db import Session, Job
 from udp.models.db import update_knowledge_from_archive
-from udp.security.sanitizer import sanitize_html
-from udp.utils.paths import downloads_dir, task_dir, ensure_dirs
+from udp.utils.paths import task_dir, ensure_dirs
 from udp.security.tunnel import tunnel_proxy_url
 
 ensure_dirs()
 
 
 def archive_web_page(url: str, task_id: str, *, max_assets: int = 200) -> dict:
-    from urllib.parse import urljoin, urlparse
 
     base_dir = task_dir(task_id)
     assets_dir = base_dir / "assets"
