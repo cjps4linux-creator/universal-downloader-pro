@@ -53,20 +53,22 @@ def run_stream_job(url: str, dest: Path, job_id: str) -> None:
     run_stream_job_with_cookies(url, dest, job_id)
 
 
-def run_stream_job_with_cookies(url: str, dest: Path, job_id: str, *, cookies: Optional[str] = None, browser: Optional[str] = None, audio_only: bool = False, playlist: bool = False) -> None:
+def run_stream_job_with_cookies(url: str, dest: Path, job_id: str, *, cookies: Optional[str] = None, browser: Optional[str] = None, audio_only: bool = False, playlist: bool = False, audio_format: str = "mp3") -> None:
     with _lock:
         _running.add(job_id)
     try:
         from udp.workers.ytdlp import stream_with_ytdlp
-        result = stream_with_ytdlp(url, dest, job_id, cookies=cookies, cookies_from_browser=browser, audio_only=audio_only, playlist=playlist)
+        result = stream_with_ytdlp(url, dest, job_id, cookies=cookies, cookies_from_browser=browser, audio_only=audio_only, playlist=playlist, audio_format=audio_format)
         try:
             path, err = result
         except Exception as exc:
             import traceback; traceback.print_exc(); print("[debug] stream_with_ytdlp returned:", type(result), result); raise
         if err:
-            _finalize(job_id, "failed", str(dest), error_message=err)
+            # stream_with_ytdlp already called _finalize on failure
+            pass
         else:
-            _finalize(job_id, "succeeded", str(path or dest), error_message=None)
+            # stream_with_ytdlp already called _finalize on success
+            pass
     except Exception as exc:
         _finalize(job_id, "failed", str(dest), error_message=str(exc))
     finally:

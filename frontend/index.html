@@ -283,10 +283,24 @@
         <div id="modeHint" class="empty"></div>
       </div>
       <div class="options" id="options">
-        <label class="toggle"><input type="checkbox" id="audioOnly" /> Audio only</label>
-        <label class="toggle"><input type="checkbox" id="playlist" /> Include playlist</label>
-      </div>
-      <label class="toggle" style="margin-top:8px"><input type="checkbox" id="cookiesFromBrowser" /> Use browser cookies</label>
+              <label class="toggle"><input type="checkbox" id="audioOnly" /> Audio only</label>
+              <label class="toggle"><input type="checkbox" id="dualMode" /> Dual mode (video + FLAC)</label>
+              <label class="toggle"><input type="checkbox" id="playlist" /> Include playlist</label>
+            </div>
+            <div class="options" id="audioFormatRow" style="display:none; margin-top:8px; align-items:center">
+              <label style="color:var(--muted);font-size:13px;margin-right:8px">Audio format:</label>
+              <select id="audioFormat" style="padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:#0f1218;color:var(--fg);font-size:13px">
+                <option value="flac">FLAC (lossless)</option>
+                <option value="mp3">MP3</option>
+                <option value="wav">WAV</option>
+                <option value="m4a">M4A (AAC)</option>
+                <option value="opus">Opus</option>
+                <option value="vorbis">Vorbis</option>
+                <option value="aac">AAC</option>
+                <option value="alac">ALAC</option>
+              </select>
+            </div>
+            <label class="toggle" style="margin-top:8px"><input type="checkbox" id="cookiesFromBrowser" /> Use browser cookies</label>
       <div class="progress-card" id="progress">
         <div class="progress-header">
           <div>
@@ -757,37 +771,44 @@
     }
 
     async function go() {
-      const url = qs('#url').value.trim();
-      if (!url) return;
-      try {
-        setProgress({title:'Analyzing', status:'Detecting link type…', pct: 5});
-        const info = await analyze(url);
-        let mode = info.mode || info.category || 'unknown';
-        if (mode === 'unknown') mode = 'archive';
-        $('mode').textContent = mode;
-        const isStream = mode === 'stream';
-        const isArchive = mode === 'archive';
-        $('options').classList.toggle('show', isStream);
-        const audioOnly = $('audioOnly').checked;
-        const playlist = $('playlist').checked;
-        const cookiesFromBrowser = $('cookiesFromBrowser').checked;
-        const doneActions = [];
-        if (isStream) {
-          doneActions.push(
-            {label:'Play', action: async () => openDetail((await submit(url, mode, {audio_only: audioOnly, playlist, cookies_from_browser: cookiesFromBrowser})).task_id)},
-            {label:'Download', action: async () => openDetail((await submit(url, mode, {audio_only: audioOnly, playlist, cookies_from_browser: cookiesFromBrowser})).task_id)}
-          );
+          const url = qs('#url').value.trim();
+          if (!url) return;
+          try {
+            setProgress({title:'Analyzing', status:'Detecting link type…', pct: 5});
+            const info = await analyze(url);
+            let mode = info.mode || info.category || 'unknown';
+            if (mode === 'unknown') mode = 'archive';
+            $('mode').textContent = mode;
+            const isStream = mode === 'stream';
+            const isArchive = mode === 'archive';
+            $('options').classList.toggle('show', isStream);
+            const audioOnly = $('audioOnly').checked;
+            const dualMode = $('dualMode').checked;
+            const playlist = $('playlist').checked;
+            const cookiesFromBrowser = $('cookiesFromBrowser').checked;
+            const audioFormat = $('audioFormat').value;
+            const doneActions = [];
+        
+            // Show/hide audio format selector
+            const showAudioFormat = isStream && (audioOnly || dualMode);
+            $('audioFormatRow').classList.toggle('show', showAudioFormat);
+        
+            if (isStream) {
+              doneActions.push(
+                {label:'Play', action: async () => openDetail((await submit(url, mode, {audio_only: audioOnly, dual: dualMode, playlist, cookies_from_browser: cookiesFromBrowser, audio_format: audioFormat})).task_id)},
+                {label:'Download', action: async () => openDetail((await submit(url, mode, {audio_only: audioOnly, dual: dualMode, playlist, cookies_from_browser: cookiesFromBrowser, audio_format: audioFormat})).task_id)}
+              );
+            }
+            setProgress({title:'Submitting', status:'Creating job…', pct: 10});
+            const job = await submit(url, mode, {audio_only: audioOnly, dual: dualMode, playlist, cookies_from_browser: cookiesFromBrowser, audio_format: audioFormat});
+            const label = isStream ? (dualMode ? 'Downloading video + FLAC' : (audioOnly ? 'Downloading audio' : 'Downloading video')) : (isArchive ? 'Archiving page' : 'Downloading');
+            await watchJob(job.task_id, {title: label, doneMessage: `${label} complete.`, doneActions});
+          } catch (e) {
+            hideProgress();
+            console.error('Job flow error', e);
+            toast('Job error', `${e.name}: ${e.message}`);
+          }
         }
-        setProgress({title:'Submitting', status:'Creating job…', pct: 10});
-        const job = await submit(url, mode, {audio_only: audioOnly, playlist, cookies_from_browser: cookiesFromBrowser});
-        const label = isStream ? (audioOnly ? 'Downloading audio' : 'Downloading video') : (isArchive ? 'Archiving page' : 'Downloading');
-        await watchJob(job.task_id, {title: label, doneMessage: `${label} complete.`, doneActions});
-      } catch (e) {
-        hideProgress();
-        console.error('Job flow error', e);
-        toast('Job error', `${e.name}: ${e.message}`);
-      }
-    }
 
     function escapeHtml(s) {
       return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));

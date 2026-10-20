@@ -29,3 +29,12 @@ udp_server.pid
 
 # Keep baseline assets if needed
 !assets/
+
+# Third-party wireproxy binary — NOT vendored.
+# Fetch with: python scripts/setup_wireproxy.py
+scripts/wireproxy.exe
+scripts/wireproxy_windows_*.tar.gz
+scripts/wireproxy/
+
+# Windows reserved device name artifact
+nul

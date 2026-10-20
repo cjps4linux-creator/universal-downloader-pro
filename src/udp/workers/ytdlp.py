@@ -18,13 +18,20 @@ def _venv_yt_dlp() -> str:
     return str(Path(__file__).resolve().parent.parent.parent.parent / ".venv" / "Scripts" / "yt-dlp.exe")
 
 
-def stream_with_ytdlp(url: str, dest: Path, job_id: str, *, cookies: Optional[str] = None, cookies_from_browser: Optional[str] = None, audio_only: bool = False, playlist: bool = False) -> tuple[Path, Optional[str]]:
+def stream_with_ytdlp(url: str, dest: Path, job_id: str, *, cookies: Optional[str] = None, cookies_from_browser: Optional[str] = None, audio_only: bool = False, playlist: bool = False, audio_format: str = "mp3") -> tuple[Path, Optional[str]]:
     yt_dlp = shutil.which("yt-dlp") or _venv_yt_dlp()
     if not yt_dlp or not Path(yt_dlp).exists():
         return dest, f"yt-dlp not found: tried PATH={shutil.which('yt-dlp')}, venv={_venv_yt_dlp()}"
 
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    out_template = str(dest) + ".%(ext)s"
+    # Validate audio format
+    valid_formats = {"mp3", "flac", "wav", "m4a", "opus", "vorbis", "aac", "alac"}
+    if audio_format.lower() not in valid_formats:
+        audio_format = "mp3"
+
+    dest.mkdir(parents=True, exist_ok=True)
+
+    # Use video title as filename (sanitized by yt-dlp)
+    out_template = str(dest / "%(title)s.%(ext)s")
     cmd = [
         yt_dlp,
         "-f", "bestaudio/best" if audio_only else "bestvideo+bestaudio/best",
@@ -34,12 +41,13 @@ def stream_with_ytdlp(url: str, dest: Path, job_id: str, *, cookies: Optional[st
         "--fragment-retries", "6",
         "--concurrent-fragments", "1",
         "--no-warnings",
+        "--force-overwrites",
         "--print", "after_move:filepath",
         "--print", "after_move:filesize",
         "--print", "after_move:extractor",
     ]
     if audio_only:
-        cmd.extend(["--extract-audio", "--audio-format", "mp3", "--audio-quality", "0"])
+        cmd.extend(["--extract-audio", "--audio-format", audio_format.lower(), "--audio-quality", "0"])
     if playlist:
         cmd.remove("--no-playlist")
         cmd.extend(["--yes-playlist", "--merge-output-format", "mp4"])
@@ -66,7 +74,7 @@ def stream_with_ytdlp(url: str, dest: Path, job_id: str, *, cookies: Optional[st
 
     if proc.returncode != 0:
         stderr = proc.stderr.strip()[-4000:] if proc.stderr else ""
-        bot_hint = _maybe_retry_with_browser_cookies(url, dest, job_id, cookies, cookies_from_browser, audio_only, playlist, stderr)
+        bot_hint = _maybe_retry_with_browser_cookies(url, dest, job_id, cookies, cookies_from_browser, audio_only, playlist, stderr, audio_format)
         if bot_hint:
             return dest, bot_hint
         _finalize(job_id, "failed", str(dest), error_message=stderr or f"exit {proc.returncode}")
@@ -88,16 +96,22 @@ def stream_with_ytdlp(url: str, dest: Path, job_id: str, *, cookies: Optional[st
     stdout_lines = [line.strip() for line in (proc.stdout or "").splitlines() if line.strip()]
     filename = None
     filesize = None
-    for line in stdout_lines:
-        if line.startswith("after_move:filepath:"):
-            filename = line.split(":", 1)[1].strip()
-        elif line.startswith("after_move:filesize:"):
-            try:
-                filesize = int(line.split(":", 1)[1].strip())
-            except Exception:
-                pass
-        elif line.startswith("after_move:extractor:"):
-            meta.setdefault("extractor", line.split(":", 1)[1].strip())
+    extractor = None
+    if len(stdout_lines) >= 3:
+        filename = stdout_lines[0]
+        try:
+            filesize = int(stdout_lines[1])
+        except Exception:
+            pass
+        extractor = stdout_lines[2]
+    elif len(stdout_lines) == 2:
+        filename = stdout_lines[0]
+        try:
+            filesize = int(stdout_lines[1])
+        except Exception:
+            pass
+    elif len(stdout_lines) == 1:
+        filename = stdout_lines[0]
 
     if not filename:
         try:
@@ -110,18 +124,28 @@ def stream_with_ytdlp(url: str, dest: Path, job_id: str, *, cookies: Optional[st
         except Exception:
             pass
 
+    if extractor:
+        meta.setdefault("extractor", extractor)
+
     try:
+        # DEBUG: Write to file to see what's happening
+        with open("C:/tmp/ytdlp_debug.log", "a") as df:
+            df.write(f"JOB {job_id}: entering session block, filename={filename}\n")
         with Session() as session:
             job = session.get(Job, job_id)
             if job:
+                with open("C:/tmp/ytdlp_debug.log", "a") as df:
+                    df.write(f"JOB {job_id}: got job object, meta title={meta.get('title')}\n")
                 if meta.get("title"):
                     job.stream_title = meta["title"][:1024]
                 if filename:
                     job.stream_filename = Path(filename).name[:1024]
                     job.dest_path = str(Path(filename))
+                    print(f"[DEBUG] Set stream_filename={Path(filename).name}, dest_path={str(Path(filename))}")
                 if not filesize and filename and Path(filename).exists():
                     try:
                         job.stream_filesize = Path(filename).stat().st_size
+                        print(f"[DEBUG] Set stream_filesize={job.stream_filesize}")
                     except Exception:
                         pass
                 if meta.get("extractor"):
@@ -134,8 +158,10 @@ def stream_with_ytdlp(url: str, dest: Path, job_id: str, *, cookies: Optional[st
                 if meta.get("thumbnail"):
                     job.stream_thumbnail = meta["thumbnail"][:2048]
                 session.commit()
-    except Exception:
-        pass
+                print(f"[DEBUG] Session committed successfully for job {job_id}")
+    except Exception as exc:
+        print(f"[DEBUG] Exception in session block: {exc}")
+        import traceback; traceback.print_exc()
 
     _finalize(job_id, "succeeded", str(dest) if not filename else filename)
     return Path(filename) if filename else dest, None
@@ -159,7 +185,12 @@ def _finalize(job_id: str, status: str, dest: str, error_message: Optional[str] 
             job = session.get(Job, job_id)
             if job:
                 job.status = status
-                job.dest_path = dest
+                # Only update dest_path if it's a directory (not a file path already set)
+                if job.dest_path and Path(job.dest_path).is_file():
+                    # dest_path already set to actual file, don't overwrite
+                    pass
+                else:
+                    job.dest_path = dest
                 job.error_message = error_message
                 job.finished_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
                 session.commit()
@@ -167,22 +198,22 @@ def _finalize(job_id: str, status: str, dest: str, error_message: Optional[str] 
         pass
 
 
-def _maybe_retry_with_browser_cookies(url: str, dest: Path, job_id: str, cookies: Optional[str], cookies_from_browser: Optional[str], audio_only: bool, playlist: bool, stderr: str) -> Optional[str]:
-    lowered = (stderr or '').lower()
-    if 'sign in to confirm you' not in lowered or 'bot' not in lowered:
+def _maybe_retry_with_browser_cookies(url: str, dest: Path, job_id: str, cookies: Optional[str], cookies_from_browser: Optional[str], audio_only: bool, playlist: bool, stderr: str, audio_format: str = "mp3") -> Optional[str]:
+    lowered = (stderr or "").lower()
+    if "sign in to confirm you" not in lowered or "bot" not in lowered:
         return None
     if cookies or not cookies_from_browser:
-        return stderr or 'youtube bot check failed'
+        return stderr or "youtube bot check failed"
     try:
-        result = stream_with_ytdlp(url, dest, job_id, cookies=cookies, cookies_from_browser=cookies_from_browser, audio_only=audio_only, playlist=playlist)
+        result = stream_with_ytdlp(url, dest, job_id, cookies=cookies, cookies_from_browser=cookies_from_browser, audio_only=audio_only, playlist=playlist, audio_format=audio_format)
         if isinstance(result, tuple) and len(result) == 2:
             path, err = result
             if not err and path and Path(path).exists():
-                _finalize(job_id, 'succeeded', str(path))
+                _finalize(job_id, "succeeded", str(path))
                 return None
     except Exception:
         pass
-    return stderr or 'youtube bot check failed after cookie retry'
+    return stderr or "youtube bot check failed after cookie retry"
 
 
 def extract_info(url: str, *, cookies: Optional[str] = None) -> dict:

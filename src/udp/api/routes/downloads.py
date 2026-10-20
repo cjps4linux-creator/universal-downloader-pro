@@ -70,12 +70,13 @@ def download():
     body = request.get_json(silent=True) or {}
     url = (body.get("url") or "").strip()
     mode = (body.get("mode") or "direct").strip().lower()
+    print(f"[DEBUG] download() called: mode={repr(mode)}, url={url[:60]}...")
     if not url:
         return jsonify({"error": "url is required"}), 400
 
     ensure_dirs()
     task_id = uuid.uuid4().hex[:12]
-    dest = unique_dest_path(downloads_dir() / f"{task_id}_download")
+    dest_dir = downloads_dir()
 
     with Session() as session:
         job = Job(
@@ -83,7 +84,7 @@ def download():
             url=url,
             mode=mode,
             status="queued",
-            dest_path=str(dest),
+            dest_path="",
         )
         session.add(job)
         session.commit()
@@ -97,18 +98,139 @@ def download():
             if browser:
                 cookies = load_browser_cookies_for_url(url, browser)
         submit(run_archive_job_anti_block, url, task_id, proxy=proxy, cookies=cookies)
+
     elif mode == "stream":
         cookies = body.get("cookies")
         browser = (body.get("cookies_from_browser") or "").strip() or None
         audio_only = bool(body.get("audio_only"))
+        dual_mode = bool(body.get("dual"))
+        audio_format = (body.get("audio_format") or "mp3").strip().lower()
         playlist = bool(body.get("playlist"))
-        submit(run_stream_job_with_cookies, url, dest, task_id, cookies=cookies, browser=browser, audio_only=audio_only, playlist=playlist)
+
+        print(f"[DEBUG] Stream mode: dual_mode={dual_mode}, dual_raw={body.get('dual')}, body_keys={list(body.keys())}")
+
+        # If dual mode requested, create two jobs: video + audio
+        if dual_mode:
+            print(f"[DEBUG] Stream dual mode requested")
+            # Job 1: Video (best quality)
+            video_task_id = uuid.uuid4().hex[:12]
+            with Session() as session:
+                job = Job(
+                    id=video_task_id,
+                    url=url,
+                    mode="stream",
+                    status="queued",
+                    dest_path="",
+                )
+                session.add(job)
+                session.commit()
+            submit(run_stream_job_with_cookies, url, dest_dir, video_task_id, cookies=cookies, browser=browser, audio_only=False, playlist=False)
+            with Session() as session:
+                job = session.get(Job, video_task_id)
+                if job:
+                    job.status = "running"
+                    session.commit()
+
+            # Job 2: Audio (FLAC or selected format)
+            audio_task_id = uuid.uuid4().hex[:12]
+            with Session() as session:
+                job = Job(
+                    id=audio_task_id,
+                    url=url,
+                    mode="stream",
+                    status="queued",
+                    dest_path="",
+                )
+                session.add(job)
+                session.commit()
+            submit(run_stream_job_with_cookies, url, dest_dir, audio_task_id, cookies=cookies, browser=browser, audio_only=True, playlist=False, audio_format=audio_format)
+            with Session() as session:
+                job = session.get(Job, audio_task_id)
+                if job:
+                    job.status = "running"
+                    session.commit()
+
+            # Return both task IDs
+            return jsonify({
+                "task_id": task_id,
+                "status": "queued",
+                "mode": mode,
+                "url": url,
+                "dest": str(dest_dir),
+                "dual_tasks": {
+                    "video": video_task_id,
+                    "audio": audio_task_id
+                }
+            }), 202
+
+        # Regular single stream job
+        submit(run_stream_job_with_cookies, url, dest_dir, task_id, cookies=cookies, browser=browser, audio_only=audio_only, playlist=playlist, audio_format=audio_format)
         with Session() as session:
             job = session.get(Job, task_id)
             if job:
                 job.status = "running"
                 session.commit()
+
+    elif mode == "dual":
+            print(f"[DEBUG] Entered dual mode branch")
+            # Download both video and audio (FLAC)
+            cookies = body.get("cookies")
+            browser = (body.get("cookies_from_browser") or "").strip() or None
+            audio_format = (body.get("audio_format") or "flac").strip().lower()
+
+            # Job 1: Video (best quality)
+            video_task_id = uuid.uuid4().hex[:12]
+            with Session() as session:
+                job = Job(
+                    id=video_task_id,
+                    url=url,
+                    mode="stream",
+                    status="queued",
+                    dest_path="",
+                )
+                session.add(job)
+                session.commit()
+            submit(run_stream_job_with_cookies, url, dest_dir, video_task_id, cookies=cookies, browser=browser, audio_only=False, playlist=False)
+            with Session() as session:
+                job = session.get(Job, video_task_id)
+                if job:
+                    job.status = "running"
+                    session.commit()
+
+            # Job 2: Audio (FLAC)
+            audio_task_id = uuid.uuid4().hex[:12]
+            with Session() as session:
+                job = Job(
+                    id=audio_task_id,
+                    url=url,
+                    mode="stream",
+                    status="queued",
+                    dest_path="",
+                )
+                session.add(job)
+                session.commit()
+            submit(run_stream_job_with_cookies, url, dest_dir, audio_task_id, cookies=cookies, browser=browser, audio_only=True, playlist=False, audio_format=audio_format)
+            with Session() as session:
+                job = session.get(Job, audio_task_id)
+                if job:
+                    job.status = "running"
+                    session.commit()
+
+            # Return both task IDs
+            return jsonify({
+                "task_id": task_id,
+                "status": "queued",
+                "mode": mode,
+                "url": url,
+                "dest": str(dest_dir),
+                "dual_tasks": {
+                    "video": video_task_id,
+                    "audio": audio_task_id
+                }
+            }), 202
+
     else:
+        dest = unique_dest_path(dest_dir / f"{task_id}_download")
         dest.parent.mkdir(parents=True, exist_ok=True)
         try:
             _, err = download_file(url, dest, task_id)
@@ -134,7 +256,7 @@ def download():
         "status": "queued",
         "mode": mode,
         "url": url,
-        "dest": str(dest),
+        "dest": str(dest_dir),
     }), 202
 
 
@@ -389,14 +511,17 @@ def batch_download():
                 cookies = body.get("cookies")
                 submit(run_archive_job_anti_block, url, task_id, proxy=proxy, cookies=cookies)
             elif resolved_mode == "stream":
-                cookies = body.get("cookies")
-                browser = (body.get("cookies_from_browser") or "").strip() or None
-                submit(run_stream_job_with_cookies, url, dest, task_id, cookies=cookies, browser=browser)
-                with Session() as session:
-                    job = session.get(Job, task_id)
-                    if job:
-                        job.status = "running"
-                        session.commit()
+                            cookies = body.get("cookies")
+                            browser = (body.get("cookies_from_browser") or "").strip() or None
+                            audio_only = bool(body.get("audio_only"))
+                            audio_format = (body.get("audio_format") or "mp3").strip().lower()
+                            playlist = bool(body.get("playlist"))
+                            submit(run_stream_job_with_cookies, url, dest, task_id, cookies=cookies, browser=browser, audio_only=audio_only, playlist=playlist, audio_format=audio_format)
+                            with Session() as session:
+                                job = session.get(Job, task_id)
+                                if job:
+                                    job.status = "running"
+                                    session.commit()
             else:
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 _, err = download_file(url, dest, task_id)
