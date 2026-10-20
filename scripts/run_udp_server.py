@@ -3,9 +3,9 @@ import sys
 import secrets
 from pathlib import Path
 
-APP_DIR = Path(r"C:\Users\user\Projects\universal-downloader-pro")
+APP_DIR = Path(__file__).resolve().parent.parent
 os.chdir(APP_DIR / "src")
-os.environ["PYTHONPATH"] = str(APP_DIR)
+os.environ["PYTHONPATH"] = str(APP_DIR / "src")
 if not os.environ.get("UDP_API_TOKEN"):
     os.environ["UDP_API_TOKEN"] = secrets.token_urlsafe(32)
 

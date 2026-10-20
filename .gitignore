@@ -38,3 +38,8 @@ scripts/wireproxy/
 
 # Windows reserved device name artifact
 nul
+
+# Coverage artifacts
+.coverage
+.coverage.*
+htmlcov/
