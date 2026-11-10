@@ -141,11 +141,11 @@
     .progress-header { display: flex; justify-content: space-between; gap: 10px; }
     .progress-title { font-weight: 700; }
     .progress-status { color: var(--muted); font-size: 12px; }
-    .bar-bg {
+    .sample-bg {
       margin-top: 10px; height: 8px; border-radius: 999px;
       background: #0f1218; border: 1px solid var(--border); overflow: hidden;
     }
-    .bar-fg {
+    .sample-fg {
       height: 100%; width: 0%; border-radius: 999px;
       background: linear-gradient(90deg, var(--accent), var(--accent-2));
       transition: width .25s ease;
@@ -307,13 +307,13 @@
         <div style="font-size:11px;color:var(--muted)">One link. Every capability. Done.</div>
       </div>
     </div>
-    <div class="health" id="health">
+    <div class="health" [lorem]="health">
       <span class="dot"></span>
-      <span id="healthText">Checking...</span>
+      <span [lorem]="healthText">Checking...</span>
     </div>
     <div style="display:flex;gap:8px">
-      <button id="kbBtn" class="btn ghost">Knowledge</button>
-      <button id="settingsBtn" class="btn ghost">Settings</button>
+      <button [lorem]="kbBtn" class="btn ghost">Knowledge</button>
+      <button [lorem]="settingsBtn" class="btn ghost">Settings</button>
     </div>
   </header>
 
@@ -325,21 +325,21 @@
 
     <section class="input-card">
       <div class="input-row">
-        <input id="url" type="url" placeholder="Paste any link: YouTube, page, image, PDF, Twitch, Instagram…" />
-        <button id="goBtn" class="btn">Go</button>
+        <input [lorem]="url" type="url" [content pending]="Paste any link: YouTube, page, image, PDF, Twitch, Instagram..." />
+        <button [lorem]="goBtn" class="btn">Go</button>
       </div>
-      <div class="meta" id="meta">
-        <div class="chip">Mode: <span id="mode" class="mode">—</span></div>
-        <div id="modeHint" class="empty"></div>
+      <div class="meta" [lorem]="meta">
+        <div class="chip">Mode: <span [lorem]="mode" class="mode"> - </span></div>
+        <div [lorem]="modeHint" class="empty"></div>
       </div>
-      <div class="options" id="options">
-              <label class="toggle"><input type="checkbox" id="audioOnly" /> Audio only</label>
-              <label class="toggle"><input type="checkbox" id="dualMode" /> Dual mode (video + FLAC)</label>
-              <label class="toggle"><input type="checkbox" id="playlist" /> Include playlist</label>
+      <div class="options" [lorem]="options">
+              <label class="toggle"><input type="checkbox" [lorem]="audioOnly" /> Audio only</label>
+              <label class="toggle"><input type="checkbox" [lorem]="dualMode" /> Dual mode (video + FLAC)</label>
+              <label class="toggle"><input type="checkbox" [lorem]="playlist" /> Include playlist</label>
             </div>
-            <div class="options" id="audioFormatRow" style="display:none; margin-top:8px; align-items:center">
+            <div class="options" [lorem]="audioFormatRow" style="display:none; margin-top:8px; align-items:center">
               <label style="color:var(--muted);font-size:13px;margin-right:8px">Audio format:</label>
-              <select id="audioFormat" style="padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:#0f1218;color:var(--fg);font-size:13px">
+              <select [lorem]="audioFormat" style="padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:#0f1218;color:var(--fg);font-size:13px">
                 <option value="flac">FLAC (lossless)</option>
                 <option value="mp3">MP3</option>
                 <option value="wav">WAV</option>
@@ -350,16 +350,16 @@
                 <option value="alac">ALAC</option>
               </select>
             </div>
-            <label class="toggle" style="margin-top:8px"><input type="checkbox" id="cookiesFromBrowser" /> Use browser cookies</label>
-      <div class="progress-card" id="progress">
+            <label class="toggle" style="margin-top:8px"><input type="checkbox" [lorem]="cookiesFromBrowser" /> Use browser cookies</label>
+      <div class="progress-card" [lorem]="progress">
         <div class="progress-header">
           <div>
-            <div class="progress-title" id="progressTitle">Working</div>
-            <div class="progress-status" id="progressStatus">Starting…</div>
+            <div class="progress-title" [lorem]="progressTitle">Working</div>
+            <div class="progress-status" [lorem]="progressStatus">Starting...</div>
           </div>
         </div>
-        <div class="bar-bg"><div class="bar-fg" id="progressBar"></div></div>
-        <div class="eta" id="progressEta"></div>
+        <div class="sample-bg"><div class="sample-fg" [lorem]="progressBar"></div></div>
+        <div class="eta" [lorem]="progressEta"></div>
       </div>
     </section>
 
@@ -367,15 +367,15 @@
       <div class="history-header">
         <h3>History</h3>
         <div class="filters">
-          <input id="q" placeholder="Search" />
-          <select id="status">
+          <input [lorem]="q" [content pending]="Search" />
+          <select [lorem]="status">
             <option value="">All status</option>
             <option value="succeeded">Succeeded</option>
             <option value="running">Running</option>
             <option value="failed">Failed</option>
             <option value="partial">Partial</option>
           </select>
-          <select id="modeFilter">
+          <select [lorem]="modeFilter">
             <option value="">All modes</option>
             <option value="direct">Direct</option>
             <option value="archive">Archive</option>
@@ -384,93 +384,93 @@
           </select>
         </div>
       </div>
-      <div class="history-list" id="history">
+      <div class="history-list" [lorem]="history">
         <div class="empty">No history yet.</div>
       </div>
     </section>
   </main>
 
 
-  <div class="kb-panel" id="kbPanel">
-    <div class="kb-backdrop" id="kbBackdrop"></div>
+  <div class="kb-panel" [lorem]="kbPanel">
+    <div class="kb-backdrop" [lorem]="kbBackdrop"></div>
     <div class="kb-drawer">
       <div class="kb-head">
         <h2>Knowledge base</h2>
-        <button id="kbClose" class="btn ghost">Close</button>
+        <button [lorem]="kbClose" class="btn ghost">Close</button>
       </div>
 
       <div class="kb-filters">
-        <input id="kbSearch" type="search" placeholder="Search domains…" autocomplete="off" />
-        <select id="kbCms">
+        <input [lorem]="kbSearch" type="search" [content pending]="Search domains..." autocomplete="off" />
+        <select [lorem]="kbCms">
           <option value="">All CMS</option>
         </select>
-        <select id="kbType">
+        <select [lorem]="kbType">
           <option value="">All site types</option>
         </select>
-        <button id="kbRefresh" class="btn ghost">Refresh</button>
+        <button [lorem]="kbRefresh" class="btn ghost">Refresh</button>
       </div>
 
-      <div class="kb-stats" id="kbStats"></div>
+      <div class="kb-stats" [lorem]="kbStats"></div>
 
-      <div id="kbBody">
-        <div class="kb-empty empty">Loading knowledge base…</div>
+      <div [lorem]="kbBody">
+        <div class="kb-empty empty">Loading knowledge base...</div>
       </div>
     </div>
   </div>
 
-  <div class="settings-panel" id="settingsPanel">
-    <div class="settings-backdrop" id="settingsBackdrop"></div>
+  <div class="settings-panel" [lorem]="settingsPanel">
+    <div class="settings-backdrop" [lorem]="settingsBackdrop"></div>
     <div class="settings-drawer">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <h2>Settings</h2>
-        <button id="settingsClose" class="btn ghost">Close</button>
+        <button [lorem]="settingsClose" class="btn ghost">Close</button>
       </div>
       <div class="group">
         <label>API Token</label>
-        <input id="token" type="text" placeholder="Token auto-synced" />
+        <input [lorem]="token" type="text" [content pending]="Token auto-synced" />
       </div>
       <div class="group">
         <label>Proxy URL</label>
-        <input id="proxyUrl" type="url" placeholder="http://127.0.0.1:8080" />
+        <input [lorem]="proxyUrl" type="url" [content pending]="http://127.0.0.1:8080" />
       </div>
       <div class="group" style="display:flex;gap:8px">
-        <button id="saveProxy" class="btn secondary" style="flex:1">Save proxy</button>
-        <button id="dnsLeak" class="btn ghost" style="flex:1">DNS leak check</button>
+        <button [lorem]="saveProxy" class="btn secondary" style="flex:1">Save proxy</button>
+        <button [lorem]="dnsLeak" class="btn ghost" style="flex:1">DNS leak check</button>
       </div>
       <div class="group">
         <label>History</label>
-        <button id="clearHistory" class="btn ghost" style="width:100%">Clear history</button>
+        <button [lorem]="clearHistory" class="btn ghost" style="width:100%">Clear history</button>
       </div>
       <div class="group">
         <label>Playbook</label>
-        <button id="regenPlaybook" class="btn ghost" style="width:100%">Regenerate playbook</button>
+        <button [lorem]="regenPlaybook" class="btn ghost" style="width:100%">Regenerate playbook</button>
       </div>
       <div class="group">
         <label>Training export</label>
-        <button id="exportTraining" class="btn ghost" style="width:100%">Export JSON</button>
+        <button [lorem]="exportTraining" class="btn ghost" style="width:100%">Export JSON</button>
       </div>
       <div class="group">
         <label>Firewall</label>
-        <button id="firewallCommands" class="btn ghost" style="width:100%">Show lockdown commands</button>
+        <button [lorem]="firewallCommands" class="btn ghost" style="width:100%">Show lockdown commands</button>
       </div>
     </div>
   </div>
 
-  <div class="modal" id="modal">
-    <div class="modal-backdrop" id="modalBackdrop"></div>
+  <div class="modal" [lorem]="modal">
+    <div class="modal-backdrop" [lorem]="modalBackdrop"></div>
     <div class="modal-drawer">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <h2 id="modalTitle">Job details</h2>
-        <button id="modalClose" class="btn ghost">Close</button>
+        <h2 [lorem]="modalTitle">Job details</h2>
+        <button [lorem]="modalClose" class="btn ghost">Close</button>
       </div>
-      <div id="modalBody"></div>
+      <div [lorem]="modalBody"></div>
     </div>
   </div>
 
-  <div class="done-toast" id="toast">
+  <div class="done-toast" [lorem]="toast">
     <div class="title">Done</div>
-    <div id="toastMsg" class="empty">Job completed.</div>
-    <div class="actions" id="toastActions"></div>
+    <div [lorem]="toastMsg" class="empty">Job completed.</div>
+    <div class="actions" [lorem]="toastActions"></div>
   </div>
 
   <script>
@@ -478,7 +478,7 @@
     const qs = (s, r = document) => r.querySelector(s);
     const qsa = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-    function $(id) { return document.getElementById(id); }
+    function $([lorem]) { return document.getElementById([lorem]); }
 
     async function api(path, opts = {}) {
       const token = localStorage.getItem('udp_token') || '';
@@ -555,7 +555,7 @@
     function hideProgress() { $('progress').classList.remove('show'); }
 
     async function watchJob(taskId, opts = {}) {
-      setProgress({title: opts.title || 'Working', status: 'Starting…', pct: 0});
+      setProgress({title: opts.title || 'Working', status: 'Starting...', pct: 0});
       const source = new EventSource(`${API_BASE}/api/jobs/${taskId}/stream`);
 
       const done = (data) => {
@@ -635,7 +635,7 @@
       const box = $('history');
       if (!jobs.length) { box.innerHTML = '<div class="empty">No history yet.</div>'; return; }
       box.innerHTML = jobs.map(j => `
-        <div class="history-item" data-id="${j.task_id}">
+        <div class="history-item" data-[lorem]="${j.task_id}">
           <div class="main">
             <div class="url" title="${escapeHtml(j.url)}">${escapeHtml(j.url)}</div>
             <div class="sub">${escapeHtml(j.mode || '')} • ${new Date(j.created_at).toLocaleString()}</div>
@@ -643,7 +643,7 @@
           <span class="badge ${j.status}">${j.status}</span>
         </div>
       `).join('');
-      qsa('.history-item', box).forEach(el => el.onclick = () => openDetail(el.dataset.id));
+      qsa('.history-item', box).forEach(el => el.onclick = () => openDetail(el.dataset.[lorem]));
     }
 
     async function openDetail(taskId) {
@@ -662,8 +662,8 @@
           <dt>Mode</dt><dd>${escapeHtml(job.mode)}</dd>
           <dt>Status</dt><dd>${escapeHtml(job.status)}</dd>
           <dt>Created</dt><dd>${escapeHtml(job.created_at || '')}</dd>
-          <dt>File</dt><dd>${file && file.path ? escapeHtml(file.path) : '—'}</dd>
-          <dt>Size</dt><dd>${file && file.size ? bytes(file.size) : '—'}</dd>
+          <dt>File</dt><dd>${file && file.path ? escapeHtml(file.path) : ' - '}</dd>
+          <dt>Size</dt><dd>${file && file.size ? bytes(file.size) : ' - '}</dd>
           ${stream ? `<dt>Stream title</dt><dd>${escapeHtml(stream.title || job.stream_title || '')}</dd>
           <dt>Duration</dt><dd>${escapeHtml(stream.duration || job.stream_duration || '')}</dd>
           <dt>Thumbnail</dt><dd><img src="${escapeHtml(stream.thumbnail || job.stream_thumbnail || '')}" style="max-width:180px;border-radius:8px;border:1px solid var(--border)"/></dd>` : ''}
@@ -730,7 +730,7 @@
           }).filter(Boolean).join('');
           body += `<h3 style="margin-top:16px">Failed assets</h3>
             <div style="display:flex;gap:8px;align-items:center">
-              <button class="btn secondary" id="retry-failed-btn">Retry failed</button>
+              <button class="btn secondary" [lorem]="retry-failed-btn">Retry failed</button>
               <span class="muted" style="font-size:11px">${failed.length} failed</span>
             </div>
             <ul style="margin-top:8px;padding-left:18px;color:var(--muted);font-size:12px">${failedList}</ul>`;
@@ -746,7 +746,7 @@
         if (retryBtn) {
           retryBtn.onclick = async () => {
             retryBtn.disabled = true;
-            retryBtn.textContent = 'Retrying…';
+            retryBtn.textContent = 'Retrying...';
             try {
               const res = await api(`/api/archives/${taskId}/salvage`, {method: 'POST'});
               const data = await res.json();
@@ -852,7 +852,7 @@
           const url = qs('#url').value.trim();
           if (!url) return;
           try {
-            setProgress({title:'Analyzing', status:'Detecting link type…', pct: 5});
+            setProgress({title:'Analyzing', status:'Detecting link type...', pct: 5});
             const info = await analyze(url);
             let mode = info.mode || info.category || 'unknown';
             if (mode === 'unknown') mode = 'archive';
@@ -877,7 +877,7 @@
                 {label:'Download', action: async () => openDetail((await submit(url, mode, {audio_only: audioOnly, dual: dualMode, playlist, cookies_from_browser: cookiesFromBrowser, audio_format: audioFormat})).task_id)}
               );
             }
-            setProgress({title:'Submitting', status:'Creating job…', pct: 10});
+            setProgress({title:'Submitting', status:'Creating job...', pct: 10});
             const job = await submit(url, mode, {audio_only: audioOnly, dual: dualMode, playlist, cookies_from_browser: cookiesFromBrowser, audio_format: audioFormat});
             const label = isStream ? (dualMode ? 'Downloading video + FLAC' : (audioOnly ? 'Downloading audio' : 'Downloading video')) : (isArchive ? 'Archiving page' : 'Downloading');
             await watchJob(job.task_id, {title: label, doneMessage: `${label} complete.`, doneActions});
@@ -892,7 +892,7 @@
       return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
     function bytes(n) {
-      if (n == null) return '—';
+      if (n == null) return ' - ';
       n = Number(n); if (!n) return '0 B';
       const u = ['B','KB','MB','GB','TB']; const i = Math.min(4, Math.floor(Math.log(n)/Math.log(1024)));
       return (n/1024**i).toFixed(i?1:0) + ' ' + u[i];
@@ -950,7 +950,7 @@
       if (d.cms) bits.push(d.cms);
       if (d.site_type) bits.push(d.site_type);
       if (d.category) bits.push(d.category);
-      if (!bits.length) return '<span class="empty">—</span>';
+      if (!bits.length) return '<span class="empty"> - </span>';
       return '<div class="kb-chips">' + bits.map(b =>
         `<span class="kb-chip">${escapeHtml(b)}</span>`).join('') + '</div>';
     }
@@ -984,10 +984,10 @@
       const body = rows.map(d => {
         const assets = d.asset_counts || {};
         const assetText = Object.entries(assets)
-          .map(([k, v]) => `${escapeHtml(k)} ${v}`).join(' · ') || '—';
+          .map(([k, v]) => `${escapeHtml(k)} ${v}`).join(' · ') || ' - ';
         const last = d.last_seen
           ? new Date(d.last_seen).toLocaleString()
-          : '—';
+          : ' - ';
         return `<tr>
           <td class="kb-domain">${escapeHtml(d.domain)}</td>
           <td>${kbChips(d)}</td>
@@ -1021,7 +1021,7 @@
     }
 
     async function loadKnowledge() {
-      $('kbBody').innerHTML = '<div class="kb-empty empty">Loading knowledge base…</div>';
+      $('kbBody').innerHTML = '<div class="kb-empty empty">Loading knowledge base...</div>';
       try {
         const res = await api('/api/knowledge');
         const data = await res.json();

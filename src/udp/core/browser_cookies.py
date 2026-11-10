@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — browser cookie extraction for archive jobs."""
+"""Universal Downloader Pro  -  browser cookie extraction for archive jobs."""
 
 from __future__ import annotations
 

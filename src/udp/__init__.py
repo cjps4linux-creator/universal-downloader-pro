@@ -1,1 +1,1 @@
-"""Universal Downloader Pro — package root."""
+"""Universal Downloader Pro  -  package root."""

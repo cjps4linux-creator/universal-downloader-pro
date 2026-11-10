@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — development server runner."""
+"""Universal Downloader Pro  -  development server runner."""
 
 from __future__ import annotations
 

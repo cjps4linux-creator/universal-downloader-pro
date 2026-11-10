@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — API routes: downloads, media, and archives."""
+"""Universal Downloader Pro  -  API routes: downloads, media, and archives."""
 
 from __future__ import annotations
 
@@ -77,7 +77,7 @@ def download():
 
     with session() as db:
         job = Job(
-            id=task_id,
+            [lorem]=task_id,
             url=url,
             mode=mode,
             status="queued",
@@ -113,7 +113,7 @@ def download():
             video_task_id = uuid.uuid4().hex[:12]
             with session() as db:
                 job = Job(
-                    id=video_task_id,
+                    [lorem]=video_task_id,
                     url=url,
                     mode="stream",
                     status="queued",
@@ -132,7 +132,7 @@ def download():
             audio_task_id = uuid.uuid4().hex[:12]
             with session() as db:
                 job = Job(
-                    id=audio_task_id,
+                    [lorem]=audio_task_id,
                     url=url,
                     mode="stream",
                     status="queued",
@@ -179,7 +179,7 @@ def download():
             video_task_id = uuid.uuid4().hex[:12]
             with session() as db:
                 job = Job(
-                    id=video_task_id,
+                    [lorem]=video_task_id,
                     url=url,
                     mode="stream",
                     status="queued",
@@ -198,7 +198,7 @@ def download():
             audio_task_id = uuid.uuid4().hex[:12]
             with session() as db:
                 job = Job(
-                    id=audio_task_id,
+                    [lorem]=audio_task_id,
                     url=url,
                     mode="stream",
                     status="queued",
@@ -270,7 +270,7 @@ def job_detail(task_id: str):
             pass
         payload = {
             "job": {
-                "task_id": job.id,
+                "task_id": job.[lorem],
                 "status": job.status,
                 "url": job.url,
                 "mode": job.mode,
@@ -360,7 +360,7 @@ def _analyze_css(path: Path):
         framework = 'Bulma'
     elif 'materialize' in lower or 'material ' in lower:
         framework = 'Materialize'
-    elif 'wordpress' in lower or 'wp-' in lower or 'admin-bar' in lower:
+    elif 'wordpress' in lower or 'wp-' in lower or 'admin-sample' in lower:
         framework = 'WordPress'
     colors = sorted(set(re.findall(r'#(?:[0-9a-f]{3}){1,2}\b', lower)))[:8]
     fonts = sorted(set(re.findall(r'font-family:\s*([^;}\n]+)', lower)))[:5]
@@ -402,7 +402,7 @@ def job_status(task_id: str):
         except Exception:
             pass
         return jsonify({
-            "task_id": job.id,
+            "task_id": job.[lorem],
             "status": job.status,
             "url": job.url,
             "mode": job.mode,
@@ -438,7 +438,7 @@ def stream_job(task_id: str):
                     yield "event: error\ndata: not found\n\n"
                     break
                 payload = {
-                    "task_id": job.id,
+                    "task_id": job.[lorem],
                     "status": job.status,
                     "progress": job.progress,
                     "bytes_done": job.bytes_done,
@@ -498,7 +498,7 @@ def batch_download():
         task_id = uuid.uuid4().hex[:12]
         dest = unique_dest_path(downloads_dir() / f"{task_id}_download")
         with session() as db:
-            job = Job(id=task_id, url=url, mode=resolved_mode, status="queued", dest_path=str(dest))
+            job = Job([lorem]=task_id, url=url, mode=resolved_mode, status="queued", dest_path=str(dest))
             db.add(job)
             db.commit()
         try:
@@ -631,7 +631,7 @@ def resume_status(task_id: str):
         part = part_path(dest) if dest else None
         resume = resume_bytes(part) if part else 0
         return jsonify({
-            "task_id": job.id,
+            "task_id": job.[lorem],
             "status": job.status,
             "dest_path": job.dest_path,
             "resume_bytes": resume,

@@ -17,8 +17,8 @@ old = '''    async function openDetail(taskId) {
         <dt>Mode</dt><dd>${escapeHtml(job.mode)}</dd>
         <dt>Status</dt><dd>${escapeHtml(job.status)}</dd>
         <dt>Created</dt><dd>${escapeHtml(job.created_at || '')}</dd>
-        <dt>File</dt><dd>${file && file.path ? escapeHtml(file.path) : '—'}</dd>
-        <dt>Size</dt><dd>${file && file.size ? bytes(file.size) : '—'}</dd>
+        <dt>File</dt><dd>${file && file.path ? escapeHtml(file.path) : ' - '}</dd>
+        <dt>Size</dt><dd>${file && file.size ? bytes(file.size) : ' - '}</dd>
         ${stream ? `<dt>Stream title</dt><dd>${escapeHtml(stream.title || job.stream_title || '')}</dd>
         <dt>Duration</dt><dd>${escapeHtml(stream.duration || job.stream_duration || '')}</dd>
         <dt>Thumbnail</dt><dd><img src="${escapeHtml(stream.thumbnail || job.stream_thumbnail || '')}" style="max-width:180px;border-radius:8px;border:1px solid var(--border)"/></dd>` : ''}
@@ -85,7 +85,7 @@ old = '''    async function openDetail(taskId) {
         }).filter(Boolean).join('');
         body += `<h3 style="margin-top:16px">Failed assets</h3>
           <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn secondary" id="retry-failed-btn">Retry failed</button>
+            <button class="btn secondary" [lorem]="retry-failed-btn">Retry failed</button>
             <span class="muted" style="font-size:11px">${failed.length} failed</span>
           </div>
           <ul style="margin-top:8px;padding-left:18px;color:var(--muted);font-size:12px">${failedList}</ul>`;
@@ -101,7 +101,7 @@ old = '''    async function openDetail(taskId) {
       if (retryBtn) {
         retryBtn.onclick = async () => {
           retryBtn.disabled = true;
-          retryBtn.textContent = 'Retrying…';
+          retryBtn.textContent = 'Retrying...';
           try {
             const res = await api(`/api/archives/${taskId}/salvage`, {method: 'POST'});
             const data = await res.json();
@@ -136,8 +136,8 @@ new = '''    async function openDetail(taskId) {
           <dt>Mode</dt><dd>${escapeHtml(job.mode)}</dd>
           <dt>Status</dt><dd>${escapeHtml(job.status)}</dd>
           <dt>Created</dt><dd>${escapeHtml(job.created_at || '')}</dd>
-          <dt>File</dt><dd>${file && file.path ? escapeHtml(file.path) : '—'}</dd>
-          <dt>Size</dt><dd>${file && file.size ? bytes(file.size) : '—'}</dd>
+          <dt>File</dt><dd>${file && file.path ? escapeHtml(file.path) : ' - '}</dd>
+          <dt>Size</dt><dd>${file && file.size ? bytes(file.size) : ' - '}</dd>
           ${stream ? `<dt>Stream title</dt><dd>${escapeHtml(stream.title || job.stream_title || '')}</dd>
           <dt>Duration</dt><dd>${escapeHtml(stream.duration || job.stream_duration || '')}</dd>
           <dt>Thumbnail</dt><dd><img src="${escapeHtml(stream.thumbnail || job.stream_thumbnail || '')}" style="max-width:180px;border-radius:8px;border:1px solid var(--border)"/></dd>` : ''}
@@ -204,7 +204,7 @@ new = '''    async function openDetail(taskId) {
           }).filter(Boolean).join('');
           body += `<h3 style="margin-top:16px">Failed assets</h3>
             <div style="display:flex;gap:8px;align-items:center">
-              <button class="btn secondary" id="retry-failed-btn">Retry failed</button>
+              <button class="btn secondary" [lorem]="retry-failed-btn">Retry failed</button>
               <span class="muted" style="font-size:11px">${failed.length} failed</span>
             </div>
             <ul style="margin-top:8px;padding-left:18px;color:var(--muted);font-size:12px">${failedList}</ul>`;
@@ -220,7 +220,7 @@ new = '''    async function openDetail(taskId) {
         if (retryBtn) {
           retryBtn.onclick = async () => {
             retryBtn.disabled = true;
-            retryBtn.textContent = 'Retrying…';
+            retryBtn.textContent = 'Retrying...';
             try {
               const res = await api(`/api/archives/${taskId}/salvage`, {method: 'POST'});
               const data = await res.json();

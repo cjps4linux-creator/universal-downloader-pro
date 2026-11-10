@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — application factory and core app module."""
+"""Universal Downloader Pro  -  application factory and core app module."""
 
 from __future__ import annotations
 

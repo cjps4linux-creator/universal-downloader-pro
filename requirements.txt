@@ -1,4 +1,4 @@
-# Universal Downloader Pro — runtime dependencies
+# Universal Downloader Pro  -  runtime dependencies
 #
 # Generated from the [project.dependencies] table in pyproject.toml.
 # Keep the two files in sync: pyproject.toml is the source of truth.

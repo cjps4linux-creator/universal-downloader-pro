@@ -1,4 +1,4 @@
-"""Tests for Universal Downloader Pro — request security middleware.
+"""Tests for Universal Downloader Pro  -  request security middleware.
 
 Covers the token gate, the Host/Origin allow-list, and the SSRF pre-check
 that runs before a download body reaches the engine.

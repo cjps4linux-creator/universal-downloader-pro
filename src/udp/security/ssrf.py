@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — SSRF guard and URL validation."""
+"""Universal Downloader Pro  -  SSRF guard and URL validation."""
 
 from __future__ import annotations
 

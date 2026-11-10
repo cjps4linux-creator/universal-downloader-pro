@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — Windows Firewall egress lockdown."""
+"""Universal Downloader Pro  -  Windows Firewall egress lockdown."""
 
 from __future__ import annotations
 

@@ -15,18 +15,18 @@
 
 ## What it does
 
-A local-first download and archive tool. Everything runs on your machine — no
+A local-first download and archive tool. Everything runs on your machine  -  no
 account, no telemetry, no cloud dependency.
 
-- **Media downloads** — yt-dlp powered, with browser-cookie retry for
+- **Media downloads**  -  yt-dlp powered, with browser-cookie retry for
   YouTube's bot check
-- **Offline archiving** — captures a page with its assets and writes a
+- **Offline archiving**  -  captures a page with its assets and writes a
   semantic, design, dependency, accessibility, security and topology report
-- **Knowledge pipeline** — extracts what a site *is* (CMS, framework, patterns)
+- **Knowledge pipeline**  -  extracts what a site *is* (CMS, framework, patterns)
   into a reusable site playbook
-- **Batch queue** — a scheduler with a job queue and export in JSON / CSV /
+- **Batch queue**  -  a scheduler with a job queue and export in JSON / CSV /
   Markdown / manifest
-- **Optional tunnel** — an app-scoped proxy sidecar for egress control
+- **Optional tunnel**  -  an app-scoped proxy sidecar for egress control
 
 ## Requirements
 
@@ -95,15 +95,15 @@ docs/         phase brief and session snapshot
 
 ## Notes
 
-- Personal and non-commercial use. Respect the terms of service and copyright
+- Personal and [lorem]-commercial use. Respect the terms of service and copyright
   of every site and platform you point it at.
-- `downloads/` is gitignored — it is output, not source.
+- `downloads/` is gitignored  -  it is output, not source.
 - Archives are written next to the captured page as
   `<page_name>.html/` with an accompanying `<page_name>_report.txt`.
 
 ## Licence
 
-MIT — see [LICENSE](LICENSE).
+MIT  -  see [LICENSE](LICENSE).
 
 Third-party components are not covered by this licence; see each project's own
 terms.
@@ -112,6 +112,6 @@ terms.
 
 ## Credits
 
-Built by **Conrad CJ Wilson** — [GitHub](https://github.com/cjps4linux-creator) · [LinkedIn](https://linkedin.com/in/conradcjwilson)
+Built by **Conrad CJ Wilson**  -  [GitHub](https://github.com/cjps4linux-creator) · [LinkedIn](https://linkedin.com/in/conradcjwilson)
 
 `conradcjwilson0@gmail.com`

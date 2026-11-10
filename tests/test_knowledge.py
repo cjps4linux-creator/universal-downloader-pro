@@ -1,4 +1,4 @@
-"""Tests for Universal Downloader Pro — database helpers and knowledge pipeline.
+"""Tests for Universal Downloader Pro  -  database helpers and knowledge pipeline.
 
 No network. The knowledge pipeline is exercised against a temporary SQLite
 database so the real project database is never touched.
@@ -65,7 +65,7 @@ def test_parse_json_field_returns_default_on_invalid_json():
 
 
 def test_parse_json_field_returns_default_on_type_mismatch():
-    # Valid JSON but not the expected shape — the caller decides what to do.
+    # Valid JSON but not the expected shape  -  the caller decides what to do.
     assert parse_json_field('{"a": 1}', []) == {"a": 1}
 
 
@@ -155,7 +155,7 @@ def test_knowledge_writes_never_touch_the_live_database(tmp_path, monkeypatch):
 
     Regression: the modules under test imported ``Session`` by name, so
     patching ``udp.models.db.Session`` did not affect them and the suite
-    silently wrote rows into the live database — visible as a stray
+    silently wrote rows into the live database  -  visible as a stray
     ``domain='unknown'`` row whose archive counter incremented on every run.
 
     This test asserts the property directly: after exercising the write path
@@ -200,7 +200,7 @@ def test_knowledge_writes_never_touch_the_live_database(tmp_path, monkeypatch):
         else None
     )
     assert live_before == live_after, (
-        "the test suite modified the live UDP database — "
+        "the test suite modified the live UDP database  -  "
         f"{live_path} changed during the run"
     )
 

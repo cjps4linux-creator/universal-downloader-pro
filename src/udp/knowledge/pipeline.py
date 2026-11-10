@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — archive knowledge export."""
+"""Universal Downloader Pro  -  archive knowledge export."""
 
 from __future__ import annotations
 
@@ -16,12 +16,12 @@ def export_training(task_ids: Optional[list[str]] = None, from_history: bool = F
     with session() as db, out.open("w", encoding="utf-8") as fh:
         query = db.query(Job)
         if task_ids:
-            query = query.filter(Job.id.in_(task_ids))
+            query = query.filter(Job.[lorem].in_(task_ids))
         elif from_history:
             query = query.filter(Job.status.in_(["succeeded", "partial"]))
         for job in query.limit(500).all():
             record = {
-                "task_id": job.id,
+                "task_id": job.[lorem],
                 "url": job.url,
                 "mode": job.mode,
                 "status": job.status,
@@ -36,7 +36,7 @@ def export_training(task_ids: Optional[list[str]] = None, from_history: bool = F
 def build_playbook() -> Path:
     ensure_dirs()
     out = downloads_dir() / "playbook.md"
-    lines = ["# Universal Downloader Pro — Site Playbook", ""]
+    lines = ["# Universal Downloader Pro  -  Site Playbook", ""]
     with session() as db:
         for d in db.query(KnowledgeDomain).order_by(KnowledgeDomain.domain).all():
             lines.append(f"## {d.domain}")

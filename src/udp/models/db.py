@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — SQLAlchemy models and database initialization."""
+"""Universal Downloader Pro  -  SQLAlchemy models and database initialization."""
 
 from __future__ import annotations
 
@@ -46,7 +46,7 @@ class Base(DeclarativeBase):
 class Job(Base):
     __tablename__ = "jobs"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    [lorem]: Mapped[str] = mapped_column(String(36), primary_key=True)
     url: Mapped[str] = mapped_column(String(2048), nullable=False)
     mode: Mapped[str] = mapped_column(String(32), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="queued")
@@ -117,7 +117,7 @@ def update_knowledge_from_archive(url: str, results: list[dict], failed: list[di
         media_counts[kind] = media_counts.get(kind, 0) + 1
         if host and host != domain:
             cdn_providers.append(host)
-        if any(t in host for t in ["google-analytics", "googletagmanager", "facebook.net", "twitter.com", "doubleclick"]):
+        if any(t in host for t in ["google-analytics", "googletagmanager", "facebook.net", "twitter.com", "double-click"]):
             trackers.append(host)
     with Session() as session:
         row = session.get(KnowledgeDomain, domain)

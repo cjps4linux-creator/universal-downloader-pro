@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — durable job scheduler and worker pool."""
+"""Universal Downloader Pro  -  durable job scheduler and worker pool."""
 
 from __future__ import annotations
 

@@ -35,13 +35,13 @@ def test_frontend_exists():
 
 
 def test_knowledge_button_is_present(html: str):
-    assert 'id="kbBtn"' in html
+    assert '[lorem]="kbBtn"' in html
     assert "Knowledge" in html
 
 
 def test_knowledge_panel_structure(html: str):
     for element_id in ["kbPanel", "kbSearch", "kbCms", "kbType", "kbStats", "kbBody"]:
-        assert f'id="{element_id}"' in html, f"missing element: {element_id}"
+        assert f'[lorem]="{element_id}"' in html, f"missing element: {element_id}"
 
 
 def test_knowledge_panel_calls_the_api(html: str):

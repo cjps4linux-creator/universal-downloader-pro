@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — anti-blocking HTTP client and blocked-state machine."""
+"""Universal Downloader Pro  -  anti-blocking HTTP client and blocked-state machine."""
 
 from __future__ import annotations
 
