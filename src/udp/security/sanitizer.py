@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — HTML sanitization and archive origin isolation."""
+"""Universal Downloader Pro  -  HTML sanitization and archive origin isolation."""
 
 from __future__ import annotations
 

@@ -85,7 +85,7 @@ def main() -> int:
     asset = asset_for_current_platform()
     url = f"https://github.com/{REPO}/releases/download/{VERSION}/{asset}"
 
-    print(f"wireproxy setup — {REPO} {VERSION}")
+    print(f"wireproxy setup  -  {REPO} {VERSION}")
     print(f"  asset: {asset}")
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -103,7 +103,7 @@ def main() -> int:
                 expected = parts[0]
                 break
         if not expected:
-            raise SystemExit(f"No checksum published for {asset} — refusing to install.")
+            raise SystemExit(f"No checksum published for {asset}  -  refusing to install.")
 
         print(f"  fetching {asset}...")
         download(url, archive)
@@ -112,7 +112,7 @@ def main() -> int:
         print(f"  expected sha256: {expected}")
         print(f"  actual   sha256: {actual}")
         if actual != expected:
-            raise SystemExit("CHECKSUM MISMATCH — aborting. The download was not installed.")
+            raise SystemExit("CHECKSUM MISMATCH  -  aborting. The download was not installed.")
 
         print("  checksum verified")
         print("  extracting...")

@@ -1,6 +1,6 @@
 """Tests for the Universal Downloader Pro Flask application factory.
 
-Uses Flask's test client — no real HTTP server, no network.
+Uses Flask's test client  -  no real HTTP server, no network.
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — yt-dlp streaming with cookie/tier support."""
+"""Universal Downloader Pro  -  yt-dlp streaming with cookie/tier support."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — security middleware."""
+"""Universal Downloader Pro  -  security middleware."""
 
 from __future__ import annotations
 

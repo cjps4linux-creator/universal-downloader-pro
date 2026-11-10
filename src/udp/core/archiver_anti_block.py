@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — anti-blocking web archive worker."""
+"""Universal Downloader Pro  -  anti-blocking web archive worker."""
 
 from __future__ import annotations
 

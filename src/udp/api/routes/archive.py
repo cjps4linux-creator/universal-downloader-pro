@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — API routes: archive origin isolation and sanitization."""
+"""Universal Downloader Pro  -  API routes: archive origin isolation and sanitization."""
 
 from __future__ import annotations
 
@@ -117,7 +117,7 @@ def css_preview(task_id: str):
 <style>
   body {{ font-family: system-ui, sans-serif; margin: 0; padding: 24px; background: #f5f5f5; color: #222; }}
   .wrap {{ max-width: 960px; margin: 0 auto; }}
-  .bar {{ display:flex; gap: 12px; align-items:center; justify-content:space-between; }}
+  .sample {{ display:flex; gap: 12px; align-items:center; justify-content:space-between; }}
   pre {{ background:#111; color:#f8f8f2; padding:12px; border-radius:8px; overflow:auto; font-size:12px; }}
   .sample {{ margin-top: 16px; padding: 16px; border: 1px solid #ddd; border-radius: 8px; background:#fff; }}
 </style>
@@ -129,7 +129,7 @@ def css_preview(task_id: str):
 </head>
 <body>
   <div class="wrap">
-    <div class="bar">
+    <div class="sample">
       <h1 style="font-size:14px;margin:0">{filename}</h1>
       <a href="/api/archives/{task_id}/assets/{filename}" target="_blank">Raw</a>
     </div>

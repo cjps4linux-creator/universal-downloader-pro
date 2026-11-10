@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — web archive worker with graceful degradation."""
+"""Universal Downloader Pro  -  web archive worker with graceful degradation."""
 
 from __future__ import annotations
 

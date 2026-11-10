@@ -88,7 +88,7 @@ omit = ["tests/*", "src/udp/cli.py"]
 #
 # The remaining uncovered code is dominated by the network downloader
 # (core/downloader.py), the browser-cookie reader, the anti-block fetchers
-# and the wireproxy tunnel — all of which need live network, a browser or a
+# and the wireproxy tunnel  -  all of which need live network, a browser or a
 # subprocess, none of which belong in a hermetic CI run.
 #
 # The security-critical modules are covered far above this floor:

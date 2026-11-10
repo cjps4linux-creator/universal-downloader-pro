@@ -3,7 +3,7 @@
     const qs = (s, r = document) => r.querySelector(s);
     const qsa = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-    function $(id) { return document.getElementById(id); }
+    function $([lorem]) { return document.getElementById([lorem]); }
 
     async function api(path, opts = {}) {
       const token = localStorage.getItem('udp_token') || '';
@@ -80,7 +80,7 @@
     function hideProgress() { $('progress').classList.remove('show'); }
 
     async function watchJob(taskId, opts = {}) {
-      setProgress({title: opts.title || 'Working', status: 'Starting…', pct: 0});
+      setProgress({title: opts.title || 'Working', status: 'Starting...', pct: 0});
       const source = new EventSource(`${API_BASE}/api/jobs/${taskId}/stream`);
       source.onmessage = (ev) => {
         try {
@@ -130,7 +130,7 @@
       const box = $('history');
       if (!jobs.length) { box.innerHTML = '<div class="empty">No history yet.</div>'; return; }
       box.innerHTML = jobs.map(j => `
-        <div class="history-item" data-id="${j.task_id}">
+        <div class="history-item" data-[lorem]="${j.task_id}">
           <div class="main">
             <div class="url" title="${escapeHtml(j.url)}">${escapeHtml(j.url)}</div>
             <div class="sub">${escapeHtml(j.mode || '')} • ${new Date(j.created_at).toLocaleString()}</div>
@@ -138,7 +138,7 @@
           <span class="badge ${j.status}">${j.status}</span>
         </div>
       `).join('');
-      qsa('.history-item', box).forEach(el => el.onclick = () => openDetail(el.dataset.id));
+      qsa('.history-item', box).forEach(el => el.onclick = () => openDetail(el.dataset.[lorem]));
     }
 
     async function openDetail(taskId) {
@@ -155,8 +155,8 @@
         <dt>Mode</dt><dd>${escapeHtml(job.mode)}</dd>
         <dt>Status</dt><dd>${escapeHtml(job.status)}</dd>
         <dt>Created</dt><dd>${escapeHtml(job.created_at || '')}</dd>
-        <dt>File</dt><dd>${escapeHtml(job.filename || '—')}</dd>
-        <dt>Size</dt><dd>${job.filesize ? bytes(job.filesize) : '—'}</dd>
+        <dt>File</dt><dd>${escapeHtml(job.filename || ' - ')}</dd>
+        <dt>Size</dt><dd>${job.filesize ? bytes(job.filesize) : ' - '}</dd>
         ${stream ? `<dt>Stream title</dt><dd>${escapeHtml(stream.title || job.stream_title || '')}</dd>
         <dt>Duration</dt><dd>${escapeHtml(stream.duration || job.stream_duration || '')}</dd>
         <dt>Thumbnail</dt><dd><img src="${escapeHtml(stream.thumbnail || job.stream_thumbnail || '')}" style="max-width:180px;border-radius:8px;border:1px solid var(--border)"/></dd>` : ''}
@@ -203,7 +203,7 @@
       const url = qs('#url').value.trim();
       if (!url) return;
       try {
-        setProgress({title:'Analyzing', status:'Detecting link type…', pct: 5});
+        setProgress({title:'Analyzing', status:'Detecting link type...', pct: 5});
         const info = await analyze(url);
         let mode = info.mode || info.category || 'unknown';
         if (mode === 'unknown') mode = 'direct';
@@ -221,7 +221,7 @@
             {label:'Download', action: async () => openDetail((await submit(url, mode, {audio_only: audioOnly, playlist, cookies_from_browser: cookiesFromBrowser})).task_id)}
           );
         }
-        setProgress({title:'Submitting', status:'Creating job…', pct: 10});
+        setProgress({title:'Submitting', status:'Creating job...', pct: 10});
         const job = await submit(url, mode, {audio_only: audioOnly, playlist, cookies_from_browser: cookiesFromBrowser});
         const label = isStream ? (audioOnly ? 'Downloading audio' : 'Downloading video') : (isArchive ? 'Archiving page' : 'Downloading');
         await watchJob(job.task_id, {title: label, doneMessage: `${label} complete.`, doneActions});
@@ -236,7 +236,7 @@
       return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
     function bytes(n) {
-      if (n == null) return '—';
+      if (n == null) return ' - ';
       n = Number(n); if (!n) return '0 B';
       const u = ['B','KB','MB','GB','TB']; const i = Math.min(4, Math.floor(Math.log(n)/Math.log(1024)));
       return (n/1024**i).toFixed(i?1:0) + ' ' + u[i];

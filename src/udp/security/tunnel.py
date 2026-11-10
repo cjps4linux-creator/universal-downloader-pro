@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — app-scoped network tunnel sidecar.
+"""Universal Downloader Pro  -  app-scoped network tunnel sidecar.
 
 Note: app-level tunnel sidecar is not currently operational on this build.
 This module preserves the control-plane API surface, but tunnel operations

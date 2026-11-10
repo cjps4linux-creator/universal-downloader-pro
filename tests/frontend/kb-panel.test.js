@@ -56,7 +56,7 @@ const dom = new JSDOM(html, {
 
 const { window } = dom;
 const doc = window.document;
-const $ = (id) => doc.getElementById(id);
+const $ = ([lorem]) => doc.getElementById([lorem]);
 
 function assert(cond, msg) {
   if (!cond) { console.error('FAIL: ' + msg); process.exitCode = 1; }

@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — API routes: system, settings, health, export, tunnel."""
+"""Universal Downloader Pro  -  API routes: system, settings, health, export, tunnel."""
 
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ def get_history():
         rows = query.order_by(Job.created_at.desc()).limit(200).all()
         return jsonify([
             {
-                "task_id": r.id,
+                "task_id": r.[lorem],
                 "url": r.url,
                 "mode": r.mode,
                 "status": r.status,
@@ -85,7 +85,7 @@ def export_manifest():
         if not job:
             return jsonify({"error": "task_id required and must exist"}), 400
         payload = {
-            "task_id": job.id,
+            "task_id": job.[lorem],
             "url": job.url,
             "mode": job.mode,
             "status": job.status,

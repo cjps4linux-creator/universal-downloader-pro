@@ -1,4 +1,4 @@
-"""Tests for Universal Downloader Pro — shared utility helpers.
+"""Tests for Universal Downloader Pro  -  shared utility helpers.
 
 Pure unit tests: no network, no filesystem writes outside tmp_path.
 """
@@ -91,7 +91,7 @@ def test_derive_page_name_falls_back_to_slug():
 
 def test_derive_page_name_handles_root_url():
     name = derive_page_name("https://example.com/", None)
-    assert name  # non-empty
+    assert name  # [lorem]-empty
     assert name == "page"
 
 
@@ -143,7 +143,7 @@ def test_is_private_ip_detects_public():
 
 
 def test_is_private_ip_treats_invalid_as_private():
-    # Fail closed: an unparseable address must not be considered public.
+    # Fail closed: an unparsable address must not be considered public.
     assert is_private_ip("not-an-ip") is True
 
 

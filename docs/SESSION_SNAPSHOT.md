@@ -1,4 +1,4 @@
-# Universal Downloader Pro — Session Snapshot
+# Universal Downloader Pro  -  Session Snapshot
 
 **Date:** 2026-09-30  
 **Status:** Phase 0 scaffold verified; resilient engine added; tunnel control plane added, traffic plane blocked by missing SOCKS dependency

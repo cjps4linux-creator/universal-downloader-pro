@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — API routes: knowledge base."""
+"""Universal Downloader Pro  -  API routes: knowledge base."""
 
 from __future__ import annotations
 

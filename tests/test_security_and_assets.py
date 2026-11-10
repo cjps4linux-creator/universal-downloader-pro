@@ -1,4 +1,4 @@
-"""Tests for Universal Downloader Pro — security guards, asset store, paths.
+"""Tests for Universal Downloader Pro  -  security guards, asset store, paths.
 
 These are pure unit tests: no network, no database, no subprocess.
 They target the security-critical code paths so that a regression in the

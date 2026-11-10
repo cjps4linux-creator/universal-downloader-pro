@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — content-addressed asset store and resume helpers."""
+"""Universal Downloader Pro  -  content-addressed asset store and resume helpers."""
 
 from __future__ import annotations
 

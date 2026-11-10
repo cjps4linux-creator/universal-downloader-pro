@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] — 2026-10-20
+## [1.0.0]  -  2026-10-20
 
 ### Added
 
@@ -46,8 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The Ruff rule set is pinned to `E4,E7,E9,F` with `ruff==0.17.1`.
 - **Launcher scripts are location-independent.** The whole launcher family
-  — the VBScript and CMD entry points, the restart and debug scripts and
-  the shortcut PowerShell scripts — now resolves its own directory.
+   -  the VBScript and CMD entry points, the restart and debug scripts and
+  the shortcut PowerShell scripts  -  now resolves its own directory.
 - **README author credit** added: Conrad CJ Wilson.
 
 ### Removed

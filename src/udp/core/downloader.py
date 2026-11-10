@@ -1,4 +1,4 @@
-"""Universal Downloader Pro — resilient download engine."""
+"""Universal Downloader Pro  -  resilient download engine."""
 
 from __future__ import annotations
 

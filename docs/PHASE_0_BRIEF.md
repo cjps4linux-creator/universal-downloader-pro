@@ -1,9 +1,9 @@
-# Universal Downloader Pro — Phase 0 Engineering Brief
+# Universal Downloader Pro  -  Phase 0 Engineering Brief
 
 **Project:** Universal Downloader Pro  
 **Base:** Universal Downloader v1  
 **Target:** Production-grade Windows 11 desktop application  
-**Status:** Phase 0 — Stabilization scaffold  
+**Status:** Phase 0  -  Stabilization scaffold  
 
 ## Goals
 - Modular backend package with security middleware
@@ -41,5 +41,5 @@ universal-downloader-pro/
 ## Constraints
 - Windows 11, Python 3.13 (broad wheel availability)
 - No Docker/WSL
-- Personal/non-commercial use only
+- Personal/[lorem]-commercial use only
 - No marketing, sale, or commercial distribution
