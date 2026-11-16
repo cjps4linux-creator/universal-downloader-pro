@@ -32,7 +32,7 @@ dependencies = [
     "beautifulsoup4==4.12.3",
     "yt-dlp==2026.08.19",
     "nh3==0.2.17",
-    "cryptography==42.0.8",
+    "cryptography==50.0.2",
     "keyring==25.3.0",
     "tenacity==8.2.3",
     "tqdm==4.66.5",
